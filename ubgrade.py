@@ -1181,7 +1181,7 @@ class PrepareGrading(GradingBase):
 
         :files:
             Specify which files in the scans directory should be processed.
-            - If None all files will be processed, except the once that were already processed on
+            - If None all files will be processed, except for the ones that were already processed on
             previous runs of this function.
             - If 'all' all files will be processed without exceptions.
             - If a list, only files on the list will be processed.
@@ -1671,10 +1671,10 @@ class AssembleGradedExams(GradingBase):
 
         :extras:
             By default the score table on the cover page will contain scores for each
-            exam problem, the total score, and the letter grade. extras is a disctinary
+            exam problem, the total score, and the letter grade. extras is a dictionary
             which can be used to add additional data to the score table. The values are
-            names of gradebook columns that should be used. The key a string which will
-            used as the label of a score box in the score table.
+            names of gradebook columns that should be used. The keys are strings which will
+            used as labels of a score boxes in the score table.
 
         :flatten:
             Boolean. If True, an attempt will be made to flatted the output pdf files.
@@ -1718,8 +1718,10 @@ class AssembleGradedExams(GradingBase):
             score_table_data = {}
             for k in range(len(scores)):
                 score_table_data[k+1] = format_scores(scores[k])
-            score_table_data["total"] =  format_scores(record[self.total_column].values[0])
-            score_table_data["grade"] = record[self.grade_column].values[0]
+            if self.total_column in record.columns:
+                score_table_data["total"] =  format_scores(record[self.total_column].values[0])
+            if self.grade_column on record.columns:
+                score_table_data["grade"] = record[self.grade_column].values[0]
 
             for k in extras:
                 score_table_data[k] =  format_scores(record[extras[k]].values[0])
@@ -1797,11 +1799,12 @@ class EmailGradedExams(GradingBase):
     def __init__(self, template = None, main_dir = None, gradebook = None,  init_grading_data=False):
         '''
         :template:
-            Name of a text file the the template of the email text. The text can contain {placeholders},
-            enclosed in braces. Each placeholder needs to be a name of a column of the gradebook.
-            The message to each student will be formatted by replacing each placeholder by the value
-            of the corresponding column, in the row corresponding to the student. If template is None,
-            an empty string will be used as the email text.
+            Name of a text file the the template of the email text. The file should be placed 
+            in the main grading directory. The text can contain {placeholders}, enclosed in braces. 
+            Each placeholder needs to be a name of a column of the gradebook. The message to each student 
+            will be formatted by replacing each placeholder by the value of the corresponding column, in 
+            the row corresponding to the student. If template is None, an empty string will be used as 
+            the email text.
 
             If the first line of the template file starts with the string 'subject:', the reminder of this
             line will be used as the subject of the message.
@@ -1831,8 +1834,8 @@ class EmailGradedExams(GradingBase):
         # check if the template file exists
         if template is None:
             self.template = ""
-        elif os.path.isfile(template):
-            with open(template) as foo:
+        elif os.path.isfile(os.path.join(self.main_dir, template)):
+            with open(os.path.join(self.main_dir, template)) as foo:
                 self.template = foo.read()
         else:
             print(f"File {template} does not exist, exiting.")
@@ -1909,8 +1912,8 @@ class EmailGradedExams(GradingBase):
             to be the same as the sender address. Can be used to test if messages are properly formatted.
         :resend:
             Boolean. The function records in the grading data to which email addresses messages have been sent already,
-            and by default omits these addresses when the function is called again. If resend is True, this default
-            is overriden, and email will be send to every email address in the gradebook.
+            and by default omits these addresses when the function is called again. Setting `resend` to `True`, 
+            overrides this behavior, and emails are sent to every email address in the gradebook.
         '''
 
         if send_sample:
@@ -2022,7 +2025,7 @@ def prepare_grading(maxpoints, main_dir = None, gradebook = None, init_grading_d
     x.prepare_grading(files = files)
 
 
-def read_scores(main_dir = None, gradebook = None, new_gradebook = None, save=True):
+def read_scores(main_dir = None, gradebook = None, new_gradebook = None):
     
     x = ReadScores(main_dir = main_dir, gradebook = gradebook)
     x.get_scores(save=True, new_gradebook = new_gradebook)
