@@ -3,7 +3,7 @@
 This package contains scripts partially automating preparation
 and grading exams.
 
-## 1. Exam Preparatiom
+## 1. Exam Preparation
 
 1.1 Use LaTeX exam template file `exam_template.tex`  to prepare the exam.
 The cover page of the template should be left unchanged, aside from editing
@@ -33,7 +33,7 @@ does not exist, it will be created.
 * `add_backpages`: Boolean. If `True` back pages will be added to the produced pdf files, with a message that these pages will not be graded. This is intended for two-sided printing of the exam files.
 
 
-## 2. Preparation for grading.
+## 2. Preparation for grading
 
 2.1. After the exam has been administered scan the exam copies to pdf files.
 If needed, rotate the scanned pages, so that they are normally oriented (not
@@ -87,7 +87,7 @@ the `for_grading` subdirectory of the main grading directory.
 grading directory, with some data which will be needed later on. Do not delete
 this file.
 
-## 3. Grading.
+## 3. Grading
 
 Use some pdf annotation software to grade the pdf files. Mark the score for
 each problem in the score table. The script reading these scores is quite
@@ -97,7 +97,7 @@ grading is completed, place them back in the `for_grading` subdirectory of the
 main grading directory.
 
 
-## 4. Recording scores.
+## 4. Recording scores
 
 4.1. Use the function `ubgrade.read_scores` to read and record exam scores.
 The signature of this function is as follows:
