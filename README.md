@@ -9,7 +9,7 @@ Installation:
 
 ## 1. Exam Preparation
 
-1.1. Use LaTeX exam template file [`exam_template.tex`](https://raw.githubusercontent.com/bbadzioch/ubgrade/master/ubgrade/exam_template.tex)  to prepare the exam.
+**1.1.** Use LaTeX exam template file [`exam_template.tex`](https://raw.githubusercontent.com/bbadzioch/ubgrade/master/ubgrade/exam_template.tex)  to prepare the exam.
 The cover page of the template should be left unchanged, aside from editing
 the title, date, and exam instructions. The format of the remaining
 pages can be changed as needed, but the top margin should be set to at least
@@ -17,7 +17,7 @@ pages can be changed as needed, but the top margin should be set to at least
 
 <img src="https://raw.githubusercontent.com/bbadzioch/ubgrade/master/exam_template.png" style="display:block; margin-left:auto; margin-right:auto; margin-bottom:20px; margin-top:20px; width: 150px;">
 
-1.2. Once the exam is compiled to a pdf file, use the function
+**1.2.** Once the exam is compiled to a pdf file, use the function
 `ubgrade.make_exams` to produce copies of the exam with QR codes embedded
 in each page. The signature of this functions is as follows:
 
@@ -41,15 +41,15 @@ does not exist, it will be created.
 
 ## 2. Preparation for grading
 
-2.1. After the exam has been administered scan the exam copies to pdf files.
+**2.1.** After the exam has been administered scan the exam copies to pdf files.
 If needed, rotate the scanned pages, so that they are normally oriented (not
 sideways or upside down).
 
-2.2. Create a directory (which we will subsequently call *the main grading
+**2.2.** Create a directory (which we will subsequently call *the main grading
 directory*) in which all grading files will reside. Inside this directory
 create a subdirectory named `scans` and place the scanned pdf files there.
 
-2.3. Create a csv file with the roster of students taking the exam. This file
+**2.3.** Create a csv file with the roster of students taking the exam. This file
 should have at least two columns. The column with the heading `person_number`
 should be populated with person numbers of students taking the exam. The column
 with the heading `email` should contain email addresses of students. Columns
@@ -58,7 +58,7 @@ row should be the first row of the csv file.
 Place the file in the main grading directory. We will refer to this file as
 *the gradebook file*.
 
-2.4. Use the function `ubgrade.prep_grading` to prepare grading files.
+**2.4.** Use the function `ubgrade.prep_grading` to prepare grading files.
 The signature of this function is as follows:
 
 `ubgrade.prep_grading(maxpoints, main_dir = None, gradebook = None, files = None, init_grading_data = False)`
@@ -106,7 +106,7 @@ main grading directory.
 
 ## 4. Recording scores
 
-4.1. Use the function `ubgrade.read_scores` to read and record exam scores.
+Use the function `ubgrade.read_scores` to read and record exam scores.
 The signature of this function is as follows:
 
 `ubgrade.read_scores(main_dir = None, gradebook = None, new_gradebook = None)`
@@ -127,20 +127,20 @@ are no letter grades for the exam).
 
 ## 5. Returning graded exams to students
 
-5.1. The csv file with exam scores can be modified as needed, by adding letter grades, columns with some bonus or extra credit points etc. It can be
+**5.1.** The csv file with exam scores can be modified as needed, by adding letter grades, columns with some bonus or extra credit points etc. It can be
 further populated with data which will be used to format emails sent to
 students. For example, if an email to a student is supposed to use
 the first name of the student ("Dear Ann" etc.), then a column listing
 first names will be needed.
 
-5.2. Use the function `ubgrade.assemble_exams` to add score tables with problem
+**5.2.** Use the function `ubgrade.assemble_exams` to add score tables with problem
 scores, total scores, letter grades, and possibly other data to exam cover
 pages, and to assemble the exams by student.  
 The signature of this function is as follows:
 
 `ubgrade.assemble_exams(main_dir = None, gradebook = None, extras = None)`
 
-* `main_dir`:  The main grading directory, if not specified the current directory will be used.
+* `main_dir`:  The main grading directory. If not specified the current directory will be used.
 
 * `gradebook`: The name of the gradebook file. This file needs to be located in
 the main grading directory. If `None` it will be assumed that the file name
@@ -150,13 +150,12 @@ is `gradebook.csv`
 
 The pdf files produced by this function will be saved in the `graded` subdirectory of the main grading directory.
 
-
-5.3. Use the function `ubgrade.send_exams` for email graded exams to students.
+**5.3.** Use the function `ubgrade.send_exams` for email graded exams to students.
 The signature of this function is as follows:
 
-`ubgrade.send_exams(main_dir = None, gradebook = None, template = None, send_sample=False, resend = False)`
+`ubgrade.send_exams(main_dir = None, gradebook = None, template = None, send_sample = False, resend = False)`
 
-* `main_dir`:  The main grading directory, if not specified the current directory will be used.
+* `main_dir`:  The main grading directory. If not specified the current directory will be used.
 
 * `gradebook`: The name of the gradebook file. This file needs to be located in
 the main grading directory. If `None` it will be assumed that the file name
@@ -165,12 +164,11 @@ is `gradebook.csv`
 * `template`: Name of a text file with the template of the text of emails.
 This file needs to be located in the main grading directory. The text can contain `{placeholders}`, enclosed in braces.
 Each placeholder needs to be a name of a column of the gradebook.
-The message to each student will be formatted by replacing each placeholder with the value of the corresponding column. If template is `None`, an empty string will be used as the email text.
-If the first line of the template file starts with the string `subject:`, the reminder of this line will be used as the subject of the message. If the file
-does not specify the subject, the function will prompt the user to provide one.
+The message to each student will be formatted by replacing each placeholder with the value from the corresponding column. If template is `None`, an empty string will be used as the email text.
+If the first line of the template file starts with the string `subject:` then the reminder of this line will be used as the subject of the message. If the file does not specify the subject, the function will prompt the user to provide one.
 
 * `send_sample`: Boolean. If `True` a single email message will be send with the recipient address set to be the same as the sender address. This can be used to test if messages are properly formatted before sending them to students.
 
-* `resend`: Boolean. Email addresses to which messages have been sent already are recorded, and by default omitted when the function is called again. Setting `resend` to `True`, overrides this behavior, and emails are sent to every email address in the gradebook.
+* `resend`: Boolean. Email addresses to which messages have been sent are recorded, and by default omitted when the function is called again. Setting `resend` to `True` overrides this behavior, and emails are sent to every email address in the gradebook.
 
-Note that this functions sends email only to students for whom graded exam files are found.
+Note that this function will send emails only to students for whom graded exam files are found.
