@@ -14,15 +14,17 @@ import pdf2image
 
 
 class ReadScores(GradingBase):
+
     '''
     Class defining mathods that read and record scores from graded exams.
     '''
 
     @staticmethod
     def read_problem_scores(fname, maxpoints, treshold = 250):
+
         '''
-        Reads scores from score table embedded in pages of a pdf file.
-        It assumes that the file consists of copies of the same problem,
+        Reads scores from score tables embedded in pages of a pdf file.
+        It is assumed that the file consists of copies of the same problem,
         which have the same maximal point value.
 
         :fname:
@@ -31,15 +33,15 @@ class ReadScores(GradingBase):
             The maximum point value of the graded problems.
         :treshold:
             Integer value for detecting if a box of the score table is checked
-            or not. Each score box is white, so when it us unmarked the mean of its
+            or not. Each score box is white, so when it is unmarked, the mean of its
             pixel values is 255. If the mean read from the pdf is below the treshhold
             we count the score box as marked
 
         Returns:
             A list of scores, one for each pdf page. If no marked score boxes are detected
-            on a page, the value of the list for the page will be "NONE". If multiple marked
+            on a page, the entry the list for the page will be "NONE". If multiple marked
             boxes are detected, the value of the list for the page will be "MULTI" followed by
-            the list of the read scores.
+            the list of detected scores.
         '''
 
         pages = pdf2image.convert_from_path(fname)
@@ -74,6 +76,7 @@ class ReadScores(GradingBase):
 
 
     def get_scores_df(self):
+
         '''
         Reads scores from graded pdf files with exam problems.
 
@@ -129,19 +132,20 @@ class ReadScores(GradingBase):
 
 
     def get_scores(self, save = False, new_gradebook = None):
+
         '''
-        records exam scores in a gradebook with student data
+        Records exam scores in a gradebook with student data.
 
         :save:
-            Boolean. If True the the gradebook data will be saved to a csv file.
+            Boolean. If True, the the gradebook data will be saved to a csv file.
         :new_gradebook:
             The name of the csv file to save the data. If None, the data will be saved
             to self.gradebook.
 
         Returns:
-            A tuple of (scores_df, new_gradebook_df) pandas dataframes. scores_df contains
+            A tuple (scores_df, new_gradebook_df) of pandas dataframes. scores_df contains
             problem scores indexed by exam QR codes.  new_gradebook_df contains exams scores
-            merged with student data reasd from self.gradebook.
+            merged with student data read from self.gradebook.
         '''
 
 

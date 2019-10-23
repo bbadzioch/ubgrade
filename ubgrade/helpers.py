@@ -8,6 +8,7 @@ import cv2
 
 
 def pdfpage2img(pdf_page, dpi=200):
+
     '''
     Converts a single pdf page into an image.
     :pdf_page:
@@ -29,6 +30,7 @@ def pdfpage2img(pdf_page, dpi=200):
 
 
 def extract_pages(inputpdf, fpage, lpage):
+
     '''
     Extracts specified range of pages from a PyPDF2 PdfFileReader object.
 
@@ -42,6 +44,7 @@ def extract_pages(inputpdf, fpage, lpage):
     Returns:
         PyPDF2 PdfFileWriter object containing extracted pages
     '''
+
     output = pdf.PdfFileWriter()
     for i in range(fpage-1,lpage-1):
         output.addPage(inputpdf.getPage(i))
@@ -49,6 +52,7 @@ def extract_pages(inputpdf, fpage, lpage):
 
 
 def pdf2pages(fname, output_fname=None, output_directory = None):
+
     '''
     Splits a pdf file into files containing individual pages
 
@@ -58,7 +62,7 @@ def pdf2pages(fname, output_fname=None, output_directory = None):
         If string, output files will be named output_fname_n.pdf where n is the page number.
         This argument can be also a function with signature f(fname, n, page) which returns a string.
         The page argument will be passed the PyPDF2 PdfFileWriter object with the n-th page of the pdf file.
-        If output_fname is a function, the output files will be named by return values of this function.
+        If output_fname is a function, output files will be named by return values of this function.
         Defaults to the name of the processed file.
     :output_directory:
         directory where output files will be saved. If the specified directory is does not exist it will
@@ -66,11 +70,6 @@ def pdf2pages(fname, output_fname=None, output_directory = None):
 
     Returns:
         The list of file names created.
-
-    Note: Page splitting seems to interfere with checkboxes embedded in pages.
-    After splitting they can't be read, but if checkboxes are reselected they
-    work again. Splitting pages using pdftk does not create this problem:
-    os.system('pdftk merged.pdf burst > test.txt')
     '''
 
     # if no output_directory set it to the current directory
@@ -129,13 +128,13 @@ def merge_pdfs(files, output_fname="merged.pdf"):
 def enhanced_qr_decode(img, xmax=5, ymax=5):
     '''
     Enhanced decoder of QR codes. Can help with reading QR codes in noisy images.
-    If a QR code is not found in the original image the function performs a series
-    of morphological opening and closures on the image with various parametries in
+    If a QR code is not found in the original image, the function performs a series
+    of morphological openings and closures on the image with various parametries in
     an attempty to enhance the QR code.
 
     :img:
         A numpy array encoding the image.
-        Note: matrix entries must be integers in the range 0-255
+        Note: matrix entries must be unsigned integers in the range 0-255
     :xmax:
     :ymax:
         Maximal values of parameters for computing openings and closures on the image.

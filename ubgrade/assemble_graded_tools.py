@@ -8,6 +8,7 @@ import io
 import json
 import tempfile
 import shutil
+import subprocess
 
 import pandas as pd
 import PyPDF2 as pdf
@@ -44,9 +45,31 @@ class AssembleGradedExams(GradingBase):
             gradebook_df[self.email_column] = ""
             gradebook_df.to_csv(self.gradebook, index=False)
 
+        # flag indicating if flattening of pdf files can be performed
+        self.can_flatten = True
+
 
     @staticmethod
-    def cover_page_grades(fname=None, table_data=None, output_file=None):
+    def flatten_pdf(fname):
+
+        '''
+        This function can be used to flatten pdf, making anotations added in the
+        grading process non-editable. It needs pdftops and ps2pdf to work.
+
+        :fname:
+            The file to be flatten. The flattened file will have the same name.
+
+        Returns:
+            None
+        '''
+        ps_fname = os.path.splitext(fname)[0] + ".ps"
+        subprocess.call(['pdftops', fname, ps_fname])
+        subprocess.call(['ps2pdf', ps_fname, fname])
+        os.remove(ps_fname)
+
+
+
+    def cover_page_grades(self, fname, table_data=None, output_file=None, flatten=False):
 
         '''
         Add score table to the cover page of an exam
@@ -55,14 +78,24 @@ class AssembleGradedExams(GradingBase):
             Name of the pdf file to add the score table to.
         :table_data:
             A dictionary with data to be inserted in the table.
-            Keys of the dictinary will be used as labels of score boxes, and
+            Keys of the dictionary will be used as labels of score boxes, and
             the corresponding values will be printed in the score boxes.
             If the dictionary has keys "grade" and "total" the corresponding
             values will be printed in red.
         :output_file:
             The name of the pdf file with the score table added. It None,
             fname prefixed with 't_' will be used.
+        :flatten:
+            Boolean. If True, an attempt will be made to flatten the output pdf file.
+            This will work only if pdftops and ps2pdf are installed, otherwise this option
+            will have no effect.
         '''
+
+        if flatten and self.can_flatten:
+            try:
+                self.flatten_pdf(fname)
+            except:
+                self.can_flatten = False
 
         if output_file == None:
             head, tail = os.path.split(fname)
@@ -142,7 +175,7 @@ class AssembleGradedExams(GradingBase):
             writer.write(foo)
 
 
-    def mark_score(self, fname, score, max_score, output_file):
+    def mark_score(self, fname, score, max_score, output_file, flatten=False):
 
         '''
         Add a marker to the score table on an exam page indicating the score
@@ -156,10 +189,20 @@ class AssembleGradedExams(GradingBase):
             Maximum possible score for problem on the page.
         :output_file:
             The name of the pdf file that will be produced.
+        :flatten:
+            Boolean. If True, an attempt will be made to flatten the output pdf files.
+            This will work only if pdftops and ps2pdf are installed, otherwise this option
+            will have no effect.
 
         Returns:
             None
         '''
+
+        if flatten and self.can_flatten:
+            try:
+                self.flatten_pdf(fname)
+            except:
+                self.can_flatten = False
 
         # if score is not an integer, or exceed the maximal score
         # that can be recorsed in the score table, just copy the source file.
@@ -222,33 +265,12 @@ class AssembleGradedExams(GradingBase):
                     270: {"rotation": 90, "tx": 11*inch, "ty": 0*inch}}
         # merge the source pdf with the score table
         source.mergeRotatedScaledTranslatedPage(mark_pdf, scale = scale, **rotations[rot], expand=False)
+        source.compressContentStreams()
         writer.addPage(source)
 
         # save the output file
         with open(output_file, "wb") as foo:
             writer.write(foo)
-
-
-
-    @staticmethod
-    def flatten_pdf(fname):
-
-        '''
-        This function can be used to flatten pdf, making anotations added in the
-        grading process non-editable. It needs pdftops and ps2pdf to work.
-
-        :fname:
-            The file to be flatten. The flattened file will have the same name.
-
-        Returns:
-            None
-        '''
-        ps_fname = os.path.splitext(fname)[0] + ".ps"
-        c1 = f'pdftops "{fname}"  "{ps_fname}"'
-        c2 = f'ps2pdf "{ps_fname}" "{fname}"'
-        os.system(c1)
-        os.system(c2)
-        os.remove(ps_fname)
 
 
     def assemble_by_student(self, extras = None, flatten = False):
@@ -265,7 +287,7 @@ class AssembleGradedExams(GradingBase):
             be used as labels of score boxes in the score table.
 
         :flatten:
-            Boolean. If True, an attempt will be made to flatted the output pdf files.
+            Boolean. If True, an attempt will be made to flatten the output pdf files.
             This will work only if pdftops and ps2pdf are installed, otherwise this option
             will have no effect.
         '''
@@ -306,16 +328,17 @@ class AssembleGradedExams(GradingBase):
             score_table_data = {}
             for k in range(len(scores)):
                 score_table_data[k+1] = format_scores(scores[k])
+
+            for k in extras:
+                score_table_data[k] =  format_scores(record[extras[k]].values[0])
+
             if self.total_column in record.columns:
                 score_table_data["total"] =  format_scores(record[self.total_column].values[0])
             if self.grade_column in record.columns:
                 score_table_data["grade"] = record[self.grade_column].values[0]
 
-            for k in extras:
-                score_table_data[k] =  format_scores(record[extras[k]].values[0])
-
             # save the cover file with the added score table
-            self.cover_page_grades(fname=cover_copy, table_data = score_table_data, output_file=cover)
+            self.cover_page_grades(fname=cover_copy, table_data = score_table_data, output_file=cover, flatten=flatten)
             os.remove(cover_copy)
 
         print(f"Score tables added." + 40*" ")
@@ -341,7 +364,7 @@ class AssembleGradedExams(GradingBase):
             pagenum = ex_code.get_page_num()
             # get the recorded score for the page
             score = scores[pagenum -1]
-            self.mark_score(fname = page_copy, score = score, max_score = max_score, output_file = page)
+            self.mark_score(fname = page_copy, score = score, max_score = max_score, output_file = page, flatten = flatten)
             os.remove(page_copy)
         print(f"Score marks added." + 40*" ")
 
@@ -362,15 +385,6 @@ class AssembleGradedExams(GradingBase):
             exam_pages.sort()
             output_fname = os.path.join(self.graded_dir, exam_code + ".pdf")
             merge_pdfs(exam_pages, output_fname=output_fname)
-
-        exam_files = glob.glob(os.path.join(self.graded_dir, "*.pdf"))
-
-        if flatten:
-            try:
-                for f in exam_files:
-                    self.flatten_pdf(f)
-            except:
-                pass
 
         # remove the temporary directory with individual exam pages
         shutil.rmtree(temp_dir)

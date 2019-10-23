@@ -29,11 +29,13 @@ from reportlab.graphics import renderPDF
 
 
 class PrepareGrading(GradingBase):
+
     '''
     Class defining mathods used to prepare exams for grading.
     '''
 
     def __init__(self, maxpoints, main_dir = None, gradebook = None, init_grading_data=False, show_pnums = False):
+
         '''
         :maxpoints:
             A list with the maximal possible score of each exam problem. Can be also given as an integer, if the maximal
@@ -139,6 +141,7 @@ class PrepareGrading(GradingBase):
 
 
     def add_score_tables(self):
+
         '''
         Adds score tables to pdf files with exam pages. The resulting files
         are saved in the self.pages_dir with names prefixed by 't_'.
@@ -183,6 +186,7 @@ class PrepareGrading(GradingBase):
 
 
     def read_bubbles(self, img, dilx=(4,10), dily=(10, 4)):
+
         '''
         Reads person number from the bubble form on the exam cover page. In order
         for this function to work properly the rectangle with the bubble form must be
@@ -206,6 +210,7 @@ class PrepareGrading(GradingBase):
 
 
         def sort_corners(a):
+
             '''
             Given a 4x2 numpy array with coordinates of vertices
             of a rectangle, rearrange it, so that vertices appear
@@ -299,6 +304,7 @@ class PrepareGrading(GradingBase):
 
 
     def missing_qr_handler(self, scans, page_num, page_image, get_missing_data):
+
         '''
         For a pdf page where QR code is not found, this function asks for user input.
 
@@ -344,6 +350,7 @@ class PrepareGrading(GradingBase):
 
 
     def missing_pnum_handler(self, pnum, gradebook_df, scans, page_num, page_image, get_missing_data, show_page):
+
         '''
         For a pdf page with exam cover the student person number was not correctly read this function asks for user input.
 
@@ -413,6 +420,7 @@ class PrepareGrading(GradingBase):
 
 
     def read_scans(self, scans, get_missing_data=False):
+
         '''
         Given a pdf file with scanned exams:
             - reads the QR code from each page
@@ -593,6 +601,7 @@ class PrepareGrading(GradingBase):
 
 
     def assemble_by_problem(self):
+        
         '''
         Assembles pages of exam copies into files, one file containing
         all copies of a given page. Pages within each file are sorted

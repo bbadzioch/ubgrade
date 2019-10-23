@@ -23,9 +23,8 @@ class EmailGradedExams(GradingBase):
             Name of a text file the the template of the email text. The file should be placed 
             in the main grading directory. The text can contain {placeholders}, enclosed in braces. 
             Each placeholder needs to be a name of a column of the gradebook. The message to each student 
-            will be formatted by replacing each placeholder by the value of the corresponding column, in 
-            the row corresponding to the student. If template is None, an empty string will be used as 
-            the email text.
+            will be formatted by replacing each placeholder with the value of the corresponding column. 
+            If template is None, an empty string will be used as the email text.
 
             If the first line of the template file starts with the string 'subject:', the reminder of this
             line will be used as the subject of the message.
@@ -64,12 +63,12 @@ class EmailGradedExams(GradingBase):
 
 
     @staticmethod
-    def make_message(template_txt, subject, from_address, to_address, pdf_fname, **kwargs):
+    def make_message(template_txt, subject, from_address, to_address, pdf_fname = None, **kwargs):
         '''
-        Prepare the email message
+        Prepare the email message.
 
         :template_txt:
-            String the the template of the email text.
+            String with the template of the email text.
         :subject:
             String with the subject of the message
         :from_address:
@@ -77,7 +76,8 @@ class EmailGradedExams(GradingBase):
         :to_address:
             The recipient email address.
         :pdf_fname:
-            The name of the pdf files which will be attached to the email
+            The name of the pdf file which will be attached to the email. If None, the email will be 
+            formatted without an attachement.  
         :**kwargs:
             Keyword arguments which will be used to replace placeholders in the template of
             the text of the email.
@@ -88,22 +88,24 @@ class EmailGradedExams(GradingBase):
 
         # get message text by replacing placeholders with values of the keyword arguments
         msg_text = template_txt.format(**kwargs)
+        print(msg_text)
 
         msg = EmailMessage()
         msg['Subject'] = subject
         msg['From'] = from_address
         msg['To'] = to_address
 
-        msg['Content-Type'] = "text/plain; charset=utf-8; format=flowed"
+        msg['Content-Type'] = "text/plain; charset=utf-8"
         msg.set_content(msg_text)
 
         # add the pdf file as an attachment
-        with open(pdf_fname, 'rb') as f:
-            content = f.read()
-            msg.add_attachment(content, maintype='application/pdf', subtype='pdf', filename=os.path.basename(pdf_fname))
+        if pdf_fname is not None:
+            with open(pdf_fname, 'rb') as f:
+                content = f.read()
+                msg.add_attachment(content, maintype='application/pdf', subtype='pdf', filename=os.path.basename(pdf_fname))
 
         body = msg.get_body()
-        body.replace_header('Content-Type', 'text/plain; charset=utf-8; format=flowed')
+        body.replace_header('Content-Type', 'text/plain; charset=utf-8')
 
         return msg
 
@@ -130,9 +132,10 @@ class EmailGradedExams(GradingBase):
 
         :send_sample:
             Boolean. If true a single email message will be send with the recipient address set
-            to be the same as the sender address. Can be used to test if messages are properly formatted.
+            to be the same as the sender address. This can be used to test if messages are properly formatted
+            before sending them to students. 
         :resend:
-            Boolean. The function records in the grading data to which email addresses messages have been sent already,
+            Boolean. The function records in the grading data email addresses to which messages have been sent,
             and by default omits these addresses when the function is called again. Setting `resend` to `True`, 
             overrides this behavior, and emails are sent to every email address in the gradebook.
         '''
@@ -154,12 +157,13 @@ class EmailGradedExams(GradingBase):
         template_lines = self.template.split("\n")
         if template_lines[0].lower().strip().startswith("subject:"):
             subject = template_lines[0][len("subject:"):].strip()
-            template_txt = "\n".join(template_lines[1:]).strip()
-        # is the first line of the template file does not contain
+            template_txt = "\n".join(template_lines[1:])
+        # if the first line of the template file does not contain
         # the subject, ask the user what the subject should be
         else:
-            template_txt = "\n".join(template_lines).strip()
+            template_txt = "\n".join(template_lines)
             subject = input("Enter email's subject: ")
+        template_txt  =  template_txt.strip()
 
         # get stmp server login info
         login_name = input("UB login name: ").strip()
@@ -221,7 +225,7 @@ class EmailGradedExams(GradingBase):
             if send_sample:
                 break
             else:
-                # save information that the email was sent
+                # save information that the email was sent;
                 # we are saving it to the grading data file right away, in case
                 # the program gets interrupted for some reason
                 if send_success:
