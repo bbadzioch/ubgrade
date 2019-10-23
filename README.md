@@ -5,7 +5,7 @@ and grading exams.
 
 ## 1. Exam Preparation
 
-<img src="https://raw.githubusercontent.com/bbadzioch/MTH309_F2019/master/notebooks/Rotating_black_and_white_squares_frame1.png" style="width: 200px;">
+<img src="https://raw.githubusercontent.com/bbadzioch/ubgrade/master/exam_template.png" style="width: 200px;">
 
 1.1 Use LaTeX exam template file [`exam_template.tex`](https://raw.githubusercontent.com/bbadzioch/ubgrade/master/ubgrade/exam_template.tex)  to prepare the exam.
 The cover page of the template should be left unchanged, aside from editing
