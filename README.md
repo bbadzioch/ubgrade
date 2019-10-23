@@ -11,6 +11,8 @@ the title, date, and exam instructions. The format of the remaining
 pages can be changed as needed, but the top margin should be set to at least
 1.5 inch to leave enough space for a QR code.
 
+![exam cover page](exam_template.png)
+
 1.2. Once the exam is compiled to a pdf file, use the function
 `ubgrade.make_exams` to produce copies of the exam with QR codes embedded
 in each page. The signature of this functions is as follows:
