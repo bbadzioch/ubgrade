@@ -3,15 +3,19 @@
 This package contains scripts partially automating preparation
 and grading exams.
 
+Installation:
+
+`pip install ubgrade`
+
 ## 1. Exam Preparation
 
-1.1 Use LaTeX exam template file [`exam_template.tex`](https://raw.githubusercontent.com/bbadzioch/ubgrade/master/ubgrade/exam_template.tex)  to prepare the exam.
+1.1. Use LaTeX exam template file [`exam_template.tex`](https://raw.githubusercontent.com/bbadzioch/ubgrade/master/ubgrade/exam_template.tex)  to prepare the exam.
 The cover page of the template should be left unchanged, aside from editing
 the title, date, and exam instructions. The format of the remaining
 pages can be changed as needed, but the top margin should be set to at least
 1.5 inch to leave enough space for a QR code.
 
-<img src="https://raw.githubusercontent.com/bbadzioch/ubgrade/master/exam_template.png" style="width: 150px;">
+<img src="https://raw.githubusercontent.com/bbadzioch/ubgrade/master/exam_template.png" style="display:block; margin-left:auto; margin-right:auto; margin-bottom:20px; margin-top:20px; width: 150px;">
 
 1.2. Once the exam is compiled to a pdf file, use the function
 `ubgrade.make_exams` to produce copies of the exam with QR codes embedded
@@ -41,8 +45,8 @@ does not exist, it will be created.
 If needed, rotate the scanned pages, so that they are normally oriented (not
 sideways or upside down).
 
-2.2. Create a directory (which we will subsequently call the main grading
-directory) in which all grading files will reside. Inside this directory
+2.2. Create a directory (which we will subsequently call *the main grading
+directory*) in which all grading files will reside. Inside this directory
 create a subdirectory named `scans` and place the scanned pdf files there.
 
 2.3. Create a csv file with the roster of students taking the exam. This file
@@ -52,17 +56,18 @@ with the heading `email` should contain email addresses of students. Columns
 with other data (student names etc.) can be included as well. The header
 row should be the first row of the csv file.
 Place the file in the main grading directory. We will refer to this file as
-the gradebook file.
+*the gradebook file*.
 
 2.4. Use the function `ubgrade.prep_grading` to prepare grading files.
 The signature of this function is as follows:
 
-`ubgrade.prep_grading(maxpoints, main_dir = None, gradebook = None, files=None, init_grading_data=False, )`
+`ubgrade.prep_grading(maxpoints, main_dir = None, gradebook = None, files = None, init_grading_data = False)`
 
 * `maxpoints`: A list with the maximal possible score of each exam problem.
-This argument can be also given as an integer, if the maximal score for each problem is the same.
+This argument can be also given as an integer, if all problem have the same
+maximal score.
 
-* `main_dir`:  The main grading directory, if not specified the current directory will be used.
+* `main_dir`:  The main grading directory. If not specified the current directory will be used.
 
 * `gradebook`: The name of the gradebook file. This file needs to be located in
 the main grading directory. If `None` it will be assumed that the file name
@@ -104,28 +109,18 @@ main grading directory.
 4.1. Use the function `ubgrade.read_scores` to read and record exam scores.
 The signature of this function is as follows:
 
-`ubgrade.read_scores(main_dir = None, gradebook = None, new_gradebook = None,
-save=True)`
+`ubgrade.read_scores(main_dir = None, gradebook = None, new_gradebook = None)`
 
-* `main_dir`:  The main grading directory, if not specified the current directory will be used.
+* `main_dir`:  The main grading directory. If not specified the current directory will be used.
 
 * `gradebook`: The name of the gradebook file. This file needs to be located in
 the main grading directory. If `None` it will be assumed that the file name
 is `gradebook.csv`.
 
 * `new_gradebook`: The name of the csv file where the exam scores are to be
-saved. If `None` the `gradebok` file will be used. All content of the
-`gradebook` file (person numbers, QR codes etc.) will be copied to
-`new_gradebook` as well.
+saved. If `None` the `gradebok` file will be used.
 
-This function will create a column in the `new_gradebook` file for each
-exam problem, and record problem scores. If no score mark is detected on
-an exam page, the corresponding entry in `new_gradebook` will be `"NONE"`.
-If marks in two (or more) score boxes are detected, the corresponding
-entry will be `"MULTI"` followed by a list of marked score boxes.
-The function also creates a column `total` with total exam scores, and
-a column `grade` which is intended to be populated with exam letter grades
-by the instructor. Either of these columns can be deleted if they are not
+This function will copy all content of the `gradebook` file (person numbers, QR codes etc.) to `new_gradebook`. It will also create a column in the `new_gradebook` for each exam problem, and record problem scores. If no score mark is detected on an exam page, the corresponding entry in `new_gradebook` will be `"NONE"`. If marks in two (or more) score boxes of a score table are detected, the corresponding entry will be `"MULTI"` followed by a list of marked score boxes. The function also creates a column `total` with total exam scores, and a column `grade` which is intended to be populated with exam letter grades by the instructor. Either of these columns can be deleted if they are not
 to be reported to students (e.g. delete the `grade` column if there
 are no letter grades for the exam).
 
