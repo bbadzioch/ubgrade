@@ -5,17 +5,17 @@ and grading exams.
 
 ## 1. Exam Preparation
 
-1.1 Use LaTeX exam template file `exam_template.tex`  to prepare the exam.
+1.1 Use LaTeX exam template file [`exam_template.tex`](https://raw.githubusercontent.com/bbadzioch/ubgrade/master/ubgrade/exam_template.tex)  to prepare the exam.
 The cover page of the template should be left unchanged, aside from editing
 the title, date, and exam instructions. The format of the remaining
 pages can be changed as needed, but the top margin should be set to at least
 1.5 inch to leave enough space for a QR code.
 
 1.2. Once the exam is compiled to a pdf file, use the function
-`ubgrade.add_qr_codes` to produce copies of the exam with QR codes embedded
+`ubgrade.make_exams` to produce copies of the exam with QR codes embedded
 in each page. The signature of this functions is as follows:
 
-`ubgrade.add_qr_codes(template, N, qr_prefix, output_file=None, output_directory = None, add_backpages = False)`
+`ubgrade.make_exams(template, N, qr_prefix, output_file=None, output_directory = None, add_backpages = False)`
 
 * `template`:  Name of the pdf file with the exam.
 
@@ -44,18 +44,18 @@ directory) in which all grading files will reside. Inside this directory
 create a subdirectory named `scans` and place the scanned pdf files there.
 
 2.3. Create a csv file with the roster of students taking the exam. This file
-should have at least two columns. The column with the heading `person_number`,
-should be populated with person numbers of students taking the exam. The column,
+should have at least two columns. The column with the heading `person_number`
+should be populated with person numbers of students taking the exam. The column
 with the heading `email` should contain email addresses of students. Columns
 with other data (student names etc.) can be included as well. The header
 row should be the first row of the csv file.
-Place the file in the main grading
-directory. We will refer to this file as the gradebook file.
+Place the file in the main grading directory. We will refer to this file as
+the gradebook file.
 
-2.4. Use the function `ubgrade.prepare_grading` to prepare grading files.
+2.4. Use the function `ubgrade.prep_grading` to prepare grading files.
 The signature of this function is as follows:
 
-`ubgrade.prepare_grading(maxpoints, main_dir = None, gradebook = None, files=None, init_grading_data=False, )`
+`ubgrade.prep_grading(maxpoints, main_dir = None, gradebook = None, files=None, init_grading_data=False, )`
 
 * `maxpoints`: A list with the maximal possible score of each exam problem.
 This argument can be also given as an integer, if the maximal score for each problem is the same.
