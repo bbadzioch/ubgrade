@@ -5,15 +5,13 @@ and grading exams.
 
 ## 1. Exam Preparation
 
-<img src="https://raw.githubusercontent.com/bbadzioch/ubgrade/master/exam_template.png" style="width: 200px;">
-
 1.1 Use LaTeX exam template file [`exam_template.tex`](https://raw.githubusercontent.com/bbadzioch/ubgrade/master/ubgrade/exam_template.tex)  to prepare the exam.
 The cover page of the template should be left unchanged, aside from editing
 the title, date, and exam instructions. The format of the remaining
 pages can be changed as needed, but the top margin should be set to at least
 1.5 inch to leave enough space for a QR code.
 
-![exam cover page](exam_template.png)
+<img src="https://raw.githubusercontent.com/bbadzioch/ubgrade/master/exam_template.png" style="width: 150px;">
 
 1.2. Once the exam is compiled to a pdf file, use the function
 `ubgrade.make_exams` to produce copies of the exam with QR codes embedded
