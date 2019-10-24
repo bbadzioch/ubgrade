@@ -5,7 +5,9 @@ and grading of exams.
 
 Installation:
 
-```pip install ubgrade```
+```
+pip install ubgrade
+```
 
 ## 1. Exam Preparation
 
