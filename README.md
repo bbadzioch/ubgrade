@@ -9,6 +9,13 @@ Installation:
 pip install ubgrade
 ```
 
+Import 
+
+```
+import ubgrade
+```
+
+
 ## 1. Exam Preparation
 
 **1.1.** Use LaTeX exam template file [`exam_template.tex`](https://raw.githubusercontent.com/bbadzioch/ubgrade/master/ubgrade/exam_template.tex)  to prepare the exam.
@@ -23,7 +30,9 @@ pages can be changed as needed, but the top margin should be set to at least
 `ubgrade.make_exams` to produce copies of the exam with QR codes embedded
 in each page. The signature of this functions is as follows:
 
-```ubgrade.make_exams(template, N, qr_prefix, output_file=None, output_directory = None, add_backpages = False)```
+```
+ubgrade.make_exams(template, N, qr_prefix, output_file=None, output_directory = None, add_backpages = False)
+```
 
 * `template`:  Name of the pdf file with the exam.
 
@@ -63,7 +72,9 @@ Place the file in the main grading directory. We will refer to this file as
 **2.4.** Use the function `ubgrade.prep_grading` to prepare grading files.
 The signature of this function is as follows:
 
-`ubgrade.prep_grading(maxpoints, main_dir = None, gradebook = None, files = None, init_grading_data = False)`
+```
+ubgrade.prep_grading(maxpoints, main_dir = None, gradebook = None, files = None, init_grading_data = False)
+```
 
 * `maxpoints`: A list with the maximal possible score of each exam problem.
 This argument can be also given as an integer, if all problem have the same
@@ -111,7 +122,9 @@ main grading directory.
 Use the function `ubgrade.read_scores` to read and record exam scores.
 The signature of this function is as follows:
 
-`ubgrade.read_scores(main_dir = None, gradebook = None, new_gradebook = None)`
+```
+ubgrade.read_scores(main_dir = None, gradebook = None, new_gradebook = None)
+```
 
 * `main_dir`:  The main grading directory. If not specified the current directory will be used.
 
@@ -140,7 +153,9 @@ scores, total scores, letter grades, and possibly other data to exam cover
 pages, and to assemble the exams by student.  
 The signature of this function is as follows:
 
-`ubgrade.assemble_exams(main_dir = None, gradebook = None, extras = None)`
+```
+ubgrade.assemble_exams(main_dir = None, gradebook = None, extras = None)
+```
 
 * `main_dir`:  The main grading directory. If not specified the current directory will be used.
 
@@ -155,7 +170,9 @@ The pdf files produced by this function will be saved in the `graded` subdirecto
 **5.3.** Use the function `ubgrade.send_exams` for email graded exams to students.
 The signature of this function is as follows:
 
-`ubgrade.send_exams(main_dir = None, gradebook = None, template = None, send_sample = False, resend = False)`
+```
+ubgrade.send_exams(main_dir = None, gradebook = None, template = None, send_sample = False, resend = False)
+```
 
 * `main_dir`:  The main grading directory. If not specified the current directory will be used.
 
