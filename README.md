@@ -5,7 +5,7 @@ and grading of exams.
 
 Installation:
 
-`pip install ubgrade`
+```pip install ubgrade```
 
 ## 1. Exam Preparation
 
@@ -21,7 +21,7 @@ pages can be changed as needed, but the top margin should be set to at least
 `ubgrade.make_exams` to produce copies of the exam with QR codes embedded
 in each page. The signature of this functions is as follows:
 
-`ubgrade.make_exams(template, N, qr_prefix, output_file=None, output_directory = None, add_backpages = False)`
+```ubgrade.make_exams(template, N, qr_prefix, output_file=None, output_directory = None, add_backpages = False)```
 
 * `template`:  Name of the pdf file with the exam.
 
