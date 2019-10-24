@@ -1,7 +1,7 @@
 # ubgrade
 
 This package contains scripts partially automating preparation
-and grading exams.
+and grading of exams.
 
 Installation:
 
@@ -13,7 +13,7 @@ Installation:
 The cover page of the template should be left unchanged, aside from editing
 the title, date, and exam instructions. The format of the remaining
 pages can be changed as needed, but the top margin should be set to at least
-1.5 inch to leave enough space for a QR code.
+1.5 inches to leave enough space for a QR code.
 
 <img src="https://raw.githubusercontent.com/bbadzioch/ubgrade/master/exam_template.png" style="display:block; margin-left:auto; margin-right:auto; margin-bottom:20px; margin-top:20px; width: 150px;">
 
