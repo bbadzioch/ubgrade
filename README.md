@@ -1,7 +1,7 @@
 # ubgrade
 
 This package contains scripts partially automating preparation
-and grading exams.
+and grading of exams.
 
 Installation:
 
