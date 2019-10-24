@@ -9,7 +9,7 @@ Installation:
 pip install ubgrade
 ```
 
-Import 
+Import: 
 
 ```
 import ubgrade
