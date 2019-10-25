@@ -89,7 +89,7 @@ class ReadScores(GradingBase):
         '''
 
         # get files with exam problems, skip the file with exam covers
-        files = glob.glob(os.path.join(self.for_grading_dir, "*problem_*.pdf"))
+        files = glob.glob(os.path.join(self.for_grading_dir, "*page_*.pdf"))
         files = sorted([f for f in files if not covers_file(f)])
 
 
@@ -115,14 +115,15 @@ class ReadScores(GradingBase):
             problem_max = maxpoints[page_num]
 
             # read problem scores
-            score_list = self.read_problem_scores(fname = fname, maxpoints = problem_max)
+            if problem_max > 0:
+                score_list = self.read_problem_scores(fname = fname, maxpoints = problem_max)
 
-            # associate problem scores with exam codes
-            pages = [ExamCode(f).get_exam_code() for f in  page_lists[basename]]
-            if len(pages) != len(score_list):
-                return None
-            score_dict_page = {p:s for (p,s) in zip(pages, score_list)}
-            score_dict["prob_" + page_num] = score_dict_page
+                # associate problem scores with exam codes
+                pages = [ExamCode(f).get_exam_code() for f in  page_lists[basename]]
+                if len(pages) != len(score_list):
+                    return None
+                score_dict_page = {p:s for (p,s) in zip(pages, score_list)}
+                score_dict["page_" + page_num] = score_dict_page
 
         # conver the scores dictionary into dataframe with rows indexed by exam QR codes and
         # colmns labeled prob_n where n is the problem numnber

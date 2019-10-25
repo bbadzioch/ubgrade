@@ -273,7 +273,7 @@ class AssembleGradedExams(GradingBase):
             writer.write(foo)
 
 
-    def assemble_by_student(self, extras = None, flatten = False):
+    def assemble_by_student(self, extras = None, prob_labels = None, flatten = False):
 
         '''
         Assembles graded exam files by student, adding score tables to the exam
@@ -298,14 +298,18 @@ class AssembleGradedExams(GradingBase):
         gradebook_df =  pd.read_csv(self.gradebook)
 
         # get graded exam files
-        files = glob.glob(os.path.join(self.for_grading_dir, "*_problem_*.pdf"))
+        files = glob.glob(os.path.join(self.for_grading_dir, "*_page_*.pdf"))
 
         # split the graded files into pages and save them to a temporary directory
         temp_dir = tempfile.mkdtemp()
         self.split_for_grading_files(dest_dir = temp_dir)
 
         covers = sorted([f for f in glob.glob(os.path.join(temp_dir, "*.pdf")) if ExamCode(f).is_cover()])
-        prob_cols = sorted([c for c in gradebook_df.columns.tolist() if "prob_" in c])
+        prob_cols = sorted([c for c in gradebook_df.columns.tolist() if "page_" in c])
+        
+        if prob_labels is None:
+            problem_labels = dict([ (p, f"P {p.split('_')[-1]}") for p in prob_cols] ) #[ (p, f"P {p.split("_")[-1]}" ) for p in prob_cols] )
+
 
         # a function for formatting numerical score table entries
         def format_scores(n):
@@ -327,7 +331,7 @@ class AssembleGradedExams(GradingBase):
             scores = record[prob_cols].values[0]
             score_table_data = {}
             for k in range(len(scores)):
-                score_table_data[k+1] = format_scores(scores[k])
+                score_table_data[problem_labels[prob_cols[k]]] = format_scores(scores[k])
 
             for k in extras:
                 score_table_data[k] =  format_scores(record[extras[k]].values[0])
@@ -352,20 +356,22 @@ class AssembleGradedExams(GradingBase):
 
             ex_code = ExamCode(page)
             print(f"{ex_code.base}\r", end="")
-
             max_score = maxpoints[str(ex_code.get_page_num())]
 
-            page_copy = os.path.join(temp_dir, "copy_" + ex_code.base + ".pdf")
-            shutil.copyfile(page, page_copy)
-            qr = ex_code.get_exam_code()
-            record = gradebook_df.loc[gradebook_df[self.qr_code_column] == qr]
-            scores = record[prob_cols].values[0]
-            # get page/problem number
-            pagenum = ex_code.get_page_num()
-            # get the recorded score for the page
-            score = scores[pagenum -1]
-            self.mark_score(fname = page_copy, score = score, max_score = max_score, output_file = page, flatten = flatten)
-            os.remove(page_copy)
+            # pages with max_score = 0 do not have score tables
+            if max_score > 0:
+                page_copy = os.path.join(temp_dir, "copy_" + ex_code.base + ".pdf")
+                shutil.copyfile(page, page_copy)
+                qr = ex_code.get_exam_code()
+                record = gradebook_df.loc[gradebook_df[self.qr_code_column] == qr]
+                scores = record[prob_cols].values[0]
+                # get page/problem number
+                pagenum = ex_code.get_page_num()
+                # get the recorded score for the page
+                score = scores[pagenum -1]
+                self.mark_score(fname = page_copy, score = score, max_score = max_score, output_file = page, flatten = flatten)
+                os.remove(page_copy)
+
         print(f"Score marks added." + 40*" ")
 
 
