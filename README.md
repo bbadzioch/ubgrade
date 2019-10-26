@@ -1,6 +1,6 @@
 # ubgrade
 
-This package contains scripts partially automating preparation
+This package contains scripts  automating some tasks related to preparation
 and grading of exams.
 
 Installation:
