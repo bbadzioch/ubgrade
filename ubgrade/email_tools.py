@@ -88,7 +88,6 @@ class EmailGradedExams(GradingBase):
 
         # get message text by replacing placeholders with values of the keyword arguments
         msg_text = template_txt.format(**kwargs)
-        print(msg_text)
 
         msg = EmailMessage()
         msg['Subject'] = subject

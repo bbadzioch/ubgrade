@@ -74,4 +74,4 @@ def covers_file(f):
     if it consists of cover pages
     '''
 
-    return "problem_0.pdf" in os.path.basename(f)
+    return "page_0.pdf" in os.path.basename(f)

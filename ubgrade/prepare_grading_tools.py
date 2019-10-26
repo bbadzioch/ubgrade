@@ -38,13 +38,15 @@ class PrepareGrading(GradingBase):
 
         '''
         :maxpoints:
-            A list with the maximal possible score of each exam problem. Can be also given as an integer, if the maximal
-            score for each problem is the same.
+            A list with the maximal possible score of each exam page (except for the cover page). 
+            Can be also given as an integer, if the maximal score for each problem is the same. 
+            If a score corresponding to a page is 0, it indicates that this page will not be graded, 
+            and that no score table should be added to it. 
         :show_pnums:
             Boolean. If True, then when person numbers are read from  exam cover pages, images showing the reading process
             will be displayes.
 
-        The reamining arguments are inherited from the GradingBase constructor.
+        The remaining arguments are inherited from the GradingBase constructor.
         '''
 
         GradingBase.__init__(self, main_dir, gradebook, init_grading_data)
@@ -172,6 +174,11 @@ class PrepareGrading(GradingBase):
             page_num = fcode.get_page_num()
             max_score = self.maxpoints[min(page_num-1, len(self.maxpoints)-1)]
             max_score_dict[page_num] = max_score
+
+            # pages worth 0 points do not get score tables added
+            if max_score == 0:
+                shutil.copy(f, output_file)
+                continue
 
             # add the score table
             self.draw_score_table(fname = f, output_file = output_file, points=max_score)
@@ -453,9 +460,10 @@ class PrepareGrading(GradingBase):
         processing_missing_data_file = ((os.path.realpath(scans) ==  os.path.realpath(self.missing_data_pages)))
 
         # read gradebook, add qr_code column if needed
-        gradebook_df = pd.read_csv(self.gradebook, converters={self.pnum_column : str})
+        gradebook_df = pd.read_csv(self.gradebook, converters={self.pnum_column : str, self.qr_code_column : str})
         if self.qr_code_column not in gradebook_df.columns:
             gradebook_df[self.qr_code_column] = ""
+        gradebook_df[self.qr_code_column] = gradebook_df[self.qr_code_column].astype('O')
 
         # writer object for collecting pages with missing data
         missing_data_writer = pdf.PdfFileWriter()
@@ -639,9 +647,9 @@ class PrepareGrading(GradingBase):
             exam_name = ExamCode(f_n[0]).get_exam_name()
 
             if exam_name == "":
-                output = f"problem_{n}"
+                output = f"page_{n}"
             else:
-                output = f"{exam_name}_problem_{n}"
+                output = f"{exam_name}_page_{n}"
 
             # save the assembled problem file
             output_fname = os.path.join(self.for_grading_dir, output + ".pdf")
