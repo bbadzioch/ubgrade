@@ -273,17 +273,24 @@ class AssembleGradedExams(GradingBase):
             writer.write(foo)
 
 
-    def assemble_by_student(self, extras = None, prob_labels = None, flatten = False):
+    def assemble_by_student(self, prob_labels = None, extras = None,  flatten = False):
 
         '''
         Assembles graded exam files by student, adding score tables to the exam
         covers and score marks to other pages.
 
+        :prob_labels:
+            If prob_labels is None (default) score boxes for each exam problem  will be 
+            labeled according to page numbers, e.g. the label of the score for the problem 
+            on page 3 will be "P3" (the cover page is page number 0). This can be customized 
+            by assigning prob_labels to a dictionary whose keys are names of columns with 
+            problem scores in the gradebook, and values are strings with labels of the 
+            corresponding score boxes. 
         :extras:
             By default the score table on the cover page will contain scores for each
             exam problem, the total score, and the letter grade. extras is a dictionary
-            which can be used to add additional data to the score table. The values are
-            names of gradebook columns that should be used. The keys are strings which will
+            which can be used to add additional data to the score table. The keys are
+            names of gradebook columns that should be used. The values are strings which will
             be used as labels of score boxes in the score table.
 
         :flatten:
@@ -308,7 +315,7 @@ class AssembleGradedExams(GradingBase):
         prob_cols = sorted([c for c in gradebook_df.columns.tolist() if "page_" in c])
         
         if prob_labels is None:
-            problem_labels = dict([ (p, f"P {p.split('_')[-1]}") for p in prob_cols] ) #[ (p, f"P {p.split("_")[-1]}" ) for p in prob_cols] )
+            problem_labels = dict([ (p, f"P{p.split('_')[-1]}") for p in prob_cols] )
 
 
         # a function for formatting numerical score table entries
@@ -334,7 +341,7 @@ class AssembleGradedExams(GradingBase):
                 score_table_data[problem_labels[prob_cols[k]]] = format_scores(scores[k])
 
             for k in extras:
-                score_table_data[k] =  format_scores(record[extras[k]].values[0])
+                score_table_data[extras[k]] =  format_scores(record[k].values[0])
 
             if self.total_column in record.columns:
                 score_table_data["total"] =  format_scores(record[self.total_column].values[0])

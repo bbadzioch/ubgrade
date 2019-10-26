@@ -23,10 +23,10 @@ def read_scores(main_dir = None, gradebook = None, new_gradebook = None):
 
 
 
-def assemble_exams(main_dir = None, gradebook = None, extras = None, flatten = False):
+def assemble_exams(main_dir = None, gradebook = None, prob_labels = None, extras = None, flatten = False):
     
     x = AssembleGradedExams(main_dir = main_dir, gradebook = gradebook) 
-    x.assemble_by_student(extras = extras, flatten = flatten)
+    x.assemble_by_student(prob_labels = prob_labels, extras = extras, flatten = flatten)
 
 
 
