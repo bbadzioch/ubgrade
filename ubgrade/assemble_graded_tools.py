@@ -315,7 +315,7 @@ class AssembleGradedExams(GradingBase):
         prob_cols = sorted([c for c in gradebook_df.columns.tolist() if "page_" in c])
 
         if prob_labels is None:
-            problem_labels = dict([ (p, f"P{p.split('_')[-1]}") for p in prob_cols] )
+            prob_labels = dict([ (p, f"P{p.split('_')[-1]}") for p in prob_cols] )
 
 
         # a function for formatting numerical score table entries
