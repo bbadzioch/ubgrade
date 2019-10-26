@@ -38,16 +38,19 @@ ubgrade.make_exams(template, N, qr_prefix, output_file=None, output_directory = 
 
 * `N`: The number of copies of the exam that are to be produced.  
 
-* `qr_prefix`: Prefix of QR codes to be added to the exam pages. The QR code for each page will be of the form `(qr_prefix)_C(copy number)_P(page number)`. (e.g. `MTH309_C002_P03`, for the 3rd page of the second copy of the exam with `qr_prefix ="MTH309"`).
+* `qr_prefix`: Prefix of QR codes to be added to the exam pages. The QR code for each page will be of the form
+`(qr_prefix)_C(copy number)_P(page number)`. (e.g. `MTH309_C002_P03`, for the 3rd page of the second copy of 
+the exam with `qr_prefix ="MTH309"`).
 
-* `output_file`: Name of pdf files to be produced; these files will be named `output_file_n.pdf` where `n` is the number of the exam copy.
-If `output_file` is None, the name of the template file will be used.
+* `output_file`: Name of pdf files to be produced; these files will be named `output_file_n.pdf` where `n` 
+is the number of the exam copy. If `output_file` is None, the name of the template file will be used.
 
 * `output_directory`: Name of the directory where the produced pdf files will
 be saved. If None, the current directory will be used. If the given directory
 does not exist, it will be created.
 
-* `add_backpages`: Boolean. If `True` back pages will be added to the produced pdf files, with a message that these pages will not be graded. This is intended for two-sided printing of the exam files.
+* `add_backpages`: Boolean. If `True` back pages will be added to the produced pdf files, with a message that these 
+pages will not be graded. This is intended for two-sided printing of the exam files.
 
 
 ## 2. Preparation for grading
@@ -88,11 +91,14 @@ added to it etc.
 the main grading directory. If `None` it will be assumed that the file name
 is `gradebook.csv`
 
-* `files`: This argument specifies which files in the `scans` subdirectory should be processed. If `None` (default) all files will be processed, except for the ones that were already processed during previous runs of the function. This is what
-one should want in most cases. If `files = "all"` all files will be processed, without exceptions. The value of this argument can be also a list of file names, explicitly specifying which files in the `scans` subdirectory should be processed.
+* `files`: This argument specifies which files in the `scans` subdirectory should be processed. If `None` (default) all 
+files will be processed, except for the ones that were already processed during previous runs of the function. This is what
+one should want in most cases. If `files = "all"` all files will be processed, without exceptions. The value of 
+this argument can be also a list of file names, explicitly specifying which files in the `scans` subdirectory 
+should be processed.
 
-* `init_grading_data`: Boolean. If `True` it will reset metadata used by the function, in effect starting the preparation of grading files from scratch.
-Should be set to `False` (default) except in cases of some mishaps.
+* `init_grading_data`: Boolean. If `True` it will reset metadata used by the function, in effect starting the preparation 
+of grading files from scratch. Should be set to `False` (default) except in cases of some mishaps.
 
 This function performs the following tasks:
 
@@ -137,18 +143,22 @@ is `gradebook.csv`.
 * `new_gradebook`: The name of the csv file where the exam scores are to be
 saved. If `None` the `gradebok` file will be used.
 
-This function will copy all content of the `gradebook` file (person numbers, QR codes etc.) to `new_gradebook`. It will also create a column in the `new_gradebook` for each exam problem, and record problem scores. If no score mark is detected on an exam page, the corresponding entry in `new_gradebook` will be `"NONE"`. If marks in two (or more) score boxes of a score table are detected, the corresponding entry will be `"MULTI"` followed by a list of marked score boxes. The function also creates a column `total` with total exam scores, and a column `grade` which is intended to be populated with exam letter grades by the instructor. Either of these columns can be deleted if they are not
-to be reported to students (e.g. delete the `grade` column if there
+This function will copy all content of the `gradebook` file (person numbers, QR codes etc.) to `new_gradebook`. 
+It will also create a column in the `new_gradebook` for each exam problem, and record problem scores. 
+If no score mark is detected on an exam page, the corresponding entry in `new_gradebook` will be `"NONE"`. 
+If marks in two (or more) score boxes of a score table are detected, the corresponding entry will be `"MULTI"` 
+followed by a list of marked score boxes. The function also creates a column `total` with total exam scores, 
+and a column `grade` which is intended to be populated with exam letter grades by the instructor. Either of these 
+columns can be deleted if they are not to be reported to students (e.g. delete the `grade` column if there
 are no letter grades for the exam).
 
 
 ## 5. Returning graded exams to students
 
-**5.1.** The csv file with exam scores can be modified as needed, by adding letter grades, columns with some bonus or extra credit points etc. It can be
-further populated with data which will be used to format emails sent to
-students. For example, if an email to a student is supposed to use
-the first name of the student ("Dear Ann" etc.), then a column listing
-first names will be needed.
+**5.1.** The csv file with exam scores can be modified as needed, by adding letter grades, columns with some bonus 
+or extra credit points etc. It can be further populated with data which will be used to format emails sent to
+students. For example, if an email to a student is supposed to use the first name of the student ("Dear Ann" etc.), 
+then a column listing first names will be needed.
 
 **5.2.** Use the function `ubgrade.assemble_exams` to add score tables with problem
 scores, total scores, letter grades, and possibly other data to exam cover
@@ -165,14 +175,16 @@ ubgrade.assemble_exams(main_dir = None, gradebook = None, prob_labels = None, ex
 the main grading directory. If `None` it will be assumed that the file name
 is `gradebook.csv`
 
-* `prob_labels`: By default the score box  to a graded exam page in the cover page
-score table, will be labeled using the number of the page. For example, the score 
-box for page 3 will be labeled "P3" (the cover page is page 0).  This can be customized 
-by assigning to prob_labels a dictionary whose keys are names of columns with 
-problem scores in the gradebook, and values are strings with labels of the 
+* `prob_labels`: By default the score box of the cover page score table corresponding to a given exam page
+will be labeled using the number of the page. For example, the score  box for page 3 will be labeled "P3" 
+(the cover page is page 0). This can be customized  by assigning to prob_labels a dictionary whose keys are 
+names of columns with problem scores in the gradebook, and values are strings with labels of the 
 corresponding score boxes. 
 
-* `extras`: By default the score table on the cover page will contain scores for exam problems, the total score, and the letter grade (provided that columns `total` and `grade` exist in the gradebook). `extras` is a dictionary which can be used to add additional data to the score table. The dictionary values are names of gradebook columns that should be used. The keys are strings which will used as labels of score boxes in the score table.
+* `extras`: By default the score table on the cover page will contain scores for exam problems, the total score, and the
+letter grade (provided that columns `total` and `grade` exist in the gradebook). `extras` is a dictionary which can be used to
+add additional data to the score table. The dictionary keys are names of gradebook columns that should be used. The values are
+strings which will used as labels of score boxes in the score table.
 
 The pdf files produced by this function will be saved in the `graded` subdirectory of the main grading directory.
 
@@ -192,11 +204,17 @@ is `gradebook.csv`
 * `template`: Name of a text file with the template of the text of emails.
 This file needs to be located in the main grading directory. The text can contain `{placeholders}`, enclosed in braces.
 Each placeholder needs to be a name of a column of the gradebook.
-The message to each student will be formatted by replacing each placeholder with the value from the corresponding column. If template is `None`, an empty string will be used as the email text.
-If the first line of the template file starts with the string `subject:` then the reminder of this line will be used as the subject of the message. If the file does not specify the subject, the function will prompt the user to provide one.
+The message to each student will be formatted by replacing each placeholder with the value from the corresponding column. 
+If template is `None`, an empty string will be used as the email text.
+If the first line of the template file starts with the string `subject:` then the reminder of this line will be 
+used as the subject of the message. If the file does not specify the subject, the function will prompt the user 
+to provide one.
 
-* `send_sample`: Boolean. If `True` a single email message will be send with the recipient address set to be the same as the sender address. This can be used to test if messages are properly formatted before sending them to students.
+* `send_sample`: Boolean. If `True` a single email message will be send with the recipient address set to be the same as the
+sender address. This can be used to test if messages are properly formatted before sending them to students.
 
-* `resend`: Boolean. Email addresses to which messages have been sent are recorded, and by default omitted when the function is called again. Setting `resend` to `True` overrides this behavior, and emails are sent to every email address in the gradebook.
+* `resend`: Boolean. Email addresses to which messages have been sent are recorded, and by default omitted when 
+the function is called again. Setting `resend` to `True` overrides this behavior, and emails are sent to every 
+email address in the gradebook.
 
 Note that this function will send emails only to students for whom graded exam files are found.
