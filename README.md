@@ -176,7 +176,7 @@ the main grading directory. If `None` it will be assumed that the file name
 is `gradebook.csv`
 
 * `prob_labels`: By default the score box of the cover page score table corresponding to a given exam page
-will be labeled using the number of the page. For example, the score  box for page 3 will be labeled "P3" 
+will be labeled using the number of the page. For example, the score box for page 3 will be labeled "P3" 
 (the cover page is page 0). This can be customized  by assigning to prob_labels a dictionary whose keys are 
 names of columns with problem scores in the gradebook, and values are strings with labels of the 
 corresponding score boxes. 
