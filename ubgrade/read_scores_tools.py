@@ -166,7 +166,7 @@ class ReadScores(GradingBase):
         scores_df[self.total_column] = scores_temp[problem_cols].sum(axis=1).astype("int")
 
         # drop exam scores from the gradebook, to avoid duplicated columns
-        gradebook_df = pd.read_csv(self.gradebook)
+        gradebook_df = pd.read_csv(self.gradebook, converters={self.qr_code_column : str})
         for col in problem_cols + [self.total_column]:
             try:
                 gradebook_df.drop(columns = col, inplace=True)

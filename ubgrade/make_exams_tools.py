@@ -69,7 +69,7 @@ def make_exams(template, N, qr_prefix, output_file=None, output_directory = None
         for k in range(source.numPages):
 
             # create a pdf page with the QR code
-            qr_string = f"{qr_prefix}{n:03}-P{k:02}"
+            qr_string = f"{qr_prefix}C{n:03}-P{k:02}"
             pdf_bytes = io.BytesIO()
 
             c = canvas.Canvas(pdf_bytes, pagesize=letter)

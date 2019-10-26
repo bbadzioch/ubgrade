@@ -460,9 +460,10 @@ class PrepareGrading(GradingBase):
         processing_missing_data_file = ((os.path.realpath(scans) ==  os.path.realpath(self.missing_data_pages)))
 
         # read gradebook, add qr_code column if needed
-        gradebook_df = pd.read_csv(self.gradebook, converters={self.pnum_column : str})
+        gradebook_df = pd.read_csv(self.gradebook, converters={self.pnum_column : str, self.qr_code_column : str})
         if self.qr_code_column not in gradebook_df.columns:
             gradebook_df[self.qr_code_column] = ""
+        gradebook_df[self.qr_code_column] = gradebook_df[self.qr_code_column].astype('O')
 
         # writer object for collecting pages with missing data
         missing_data_writer = pdf.PdfFileWriter()

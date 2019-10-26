@@ -302,10 +302,10 @@ class AssembleGradedExams(GradingBase):
         if extras is None:
             extras = {}
 
-        gradebook_df =  pd.read_csv(self.gradebook)
+        gradebook_df =  pd.read_csv(self.gradebook, converters={self.qr_code_column : str})
 
         # get graded exam files
-        files = glob.glob(os.path.join(self.for_grading_dir, "*_page_*.pdf"))
+        files = glob.glob(os.path.join(self.for_grading_dir, "*page_*.pdf"))
 
         # split the graded files into pages and save them to a temporary directory
         temp_dir = tempfile.mkdtemp()
@@ -313,7 +313,7 @@ class AssembleGradedExams(GradingBase):
 
         covers = sorted([f for f in glob.glob(os.path.join(temp_dir, "*.pdf")) if ExamCode(f).is_cover()])
         prob_cols = sorted([c for c in gradebook_df.columns.tolist() if "page_" in c])
-        
+
         if prob_labels is None:
             problem_labels = dict([ (p, f"P{p.split('_')[-1]}") for p in prob_cols] )
 
@@ -335,13 +335,13 @@ class AssembleGradedExams(GradingBase):
             shutil.copyfile(cover, cover_copy)
             qr = ex_code.get_exam_code()
             record = gradebook_df.loc[gradebook_df[self.qr_code_column] == qr]
-            scores = record[prob_cols].values[0]
+            scores = record[prob_cols]
             score_table_data = {}
-            for k in range(len(scores)):
-                score_table_data[problem_labels[prob_cols[k]]] = format_scores(scores[k])
+            for k in prob_cols:
+                score_table_data[prob_labels[k]] = format_scores(scores[k])
 
             for k in extras:
-                score_table_data[extras[k]] =  format_scores(record[k].values[0])
+                score_table_data[extras[k]] =  format_scores(record[k])
 
             if self.total_column in record.columns:
                 score_table_data["total"] =  format_scores(record[self.total_column].values[0])
@@ -375,7 +375,7 @@ class AssembleGradedExams(GradingBase):
                 # get page/problem number
                 pagenum = ex_code.get_page_num()
                 # get the recorded score for the page
-                score = scores[pagenum -1]
+                score = record[prob_cols][f"page_{pagenum}"]
                 self.mark_score(fname = page_copy, score = score, max_score = max_score, output_file = page, flatten = flatten)
                 os.remove(page_copy)
 

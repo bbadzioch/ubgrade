@@ -130,7 +130,7 @@ class GradingBase():
             The directory where the pdf files with exam pages will be saved.
         '''
 
-        files = glob.glob(os.path.join(self.for_grading_dir, "*_problem_*.pdf"))
+        files = glob.glob(os.path.join(self.for_grading_dir, "*page_*.pdf"))
         page_lists = self.get_grading_data()["page_lists"]
 
         for f in files:
