@@ -76,9 +76,11 @@ The signature of this function is as follows:
 ubgrade.prep_grading(maxpoints, main_dir = None, gradebook = None, files = None, init_grading_data = False)
 ```
 
-* `maxpoints`: A list with the maximal possible score of each exam problem.
-This argument can be also given as an integer, if all problem have the same
-maximal score.
+* `maxpoints`: A list with the maximal possible score of each exam page.
+This argument can be also given as an integer, if all pages have the same
+maximal score. If the maximal possible score corresponding to a page is 0, 
+it indicates that the page will not be graded: there will be no score table 
+added to it etc. 
 
 * `main_dir`:  The main grading directory. If not specified the current directory will be used.
 
@@ -154,14 +156,21 @@ pages, and to assemble the exams by student.
 The signature of this function is as follows:
 
 ```
-ubgrade.assemble_exams(main_dir = None, gradebook = None, extras = None)
+ubgrade.assemble_exams(main_dir = None, gradebook = None, prob_labels = None, extras = None)
 ```
 
-* `main_dir`:  The main grading directory. If not specified the current directory will be used.
+* `main_dir`: The main grading directory. If not specified the current directory will be used.
 
 * `gradebook`: The name of the gradebook file. This file needs to be located in
 the main grading directory. If `None` it will be assumed that the file name
 is `gradebook.csv`
+
+* `prob_labels`: By default the score box  to a graded exam page in the cover page
+score table, will be labeled using the number of the page. For example, the score 
+box for page 3 will be labeled "P3" (the cover page is page 0).  This can be customized 
+by assigning to prob_labels a dictionary whose keys are names of columns with 
+problem scores in the gradebook, and values are strings with labels of the 
+corresponding score boxes. 
 
 * `extras`: By default the score table on the cover page will contain scores for exam problems, the total score, and the letter grade (provided that columns `total` and `grade` exist in the gradebook). `extras` is a dictionary which can be used to add additional data to the score table. The dictionary values are names of gradebook columns that should be used. The keys are strings which will used as labels of score boxes in the score table.
 
