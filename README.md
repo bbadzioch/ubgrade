@@ -38,7 +38,7 @@ ubgrade.make_exams(template, N, qr_prefix, output_file=None, output_directory = 
 
 * `N`: The number of copies of the exam that are to be produced.  
 
-* `qr_prefix`: Prefix of QR codes to be added to the exam pages. The QR code for each page will be of the form `(qr_prefix)_(copy number)_P(page number)`. (e.g. `MTH309_002_P03`, for the 3rd page of the second copy of the exam with `qr_prefix ="MTH309"`).
+* `qr_prefix`: Prefix of QR codes to be added to the exam pages. The QR code for each page will be of the form `(qr_prefix)_C(copy number)_P(page number)`. (e.g. `MTH309_C002_P03`, for the 3rd page of the second copy of the exam with `qr_prefix ="MTH309"`).
 
 * `output_file`: Name of pdf files to be produced; these files will be named `output_file_n.pdf` where `n` is the number of the exam copy.
 If `output_file` is None, the name of the template file will be used.

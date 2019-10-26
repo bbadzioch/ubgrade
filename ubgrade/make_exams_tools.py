@@ -24,7 +24,7 @@ def make_exams(template, N, qr_prefix, output_file=None, output_directory = None
         Integer. The number of copies to be produced.
     :qr_prefix:
         Prefix of QR codes added to the pdf file pages. The QR code for each page
-        will be (qr_prefix)_(copy number)_P(page number). (e.g. MTH309_002_P03, for
+        will be (qr_prefix)_C(copy number)_P(page number). (e.g. MTH309_C002_P03, for
         the 3rd page of the second copy of the exam with qr_prefix="MTH309").
         If qr_prefix is an empty string, QR codes will have the form (copy number)_P(page number)
         (e.g. 002_P03).
