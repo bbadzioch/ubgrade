@@ -5,13 +5,13 @@ from ubgrade.email_tools import EmailGradedExams
 
 
 
-def prep_grading(maxpoints, main_dir = None, gradebook = None, init_grading_data=False, files=None, batch=False):
+def prep_grading(maxpoints, main_dir = None, gradebook = None, batch=False, files=None,  init_grading_data=False):
     
     x = PrepareGrading(maxpoints = maxpoints, 
                        main_dir = main_dir, 
                        gradebook = gradebook, 
                        init_grading_data=init_grading_data)
-    x.prepare_grading(files = files, batch=False)
+    x.prepare_grading(files = files, batch = batch)
 
 
 
