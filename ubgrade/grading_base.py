@@ -58,6 +58,15 @@ class GradingBase():
         self.grading_data_jfile = os.path.join(self.main_dir, "grading_data.json")
 
 
+        # data structure for recording information about pages with 
+        # missing/misread QR codes and person numbers 
+        self.page_missing_data = {"fname": None, 
+                                  "page": None, 
+                                  "qr": None, 
+                                  "pnum": None
+                                  }
+
+
         # initial structure of the data in the self.grading_data_jfile file:
         # maxpoints: a dictionary used for storing the maximal possible score for each exam problem
         # processed scans: a list which records which scanned files have been processed
@@ -84,6 +93,7 @@ class GradingBase():
         self.qr_code_column = "qr_code"
         self.total_column = "total"
         self.grade_column = "grade"
+        self.pnum_time_column = "person_num_added"
 
 
         # dimensions of score tables embeded on the exam pages
