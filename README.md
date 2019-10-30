@@ -224,3 +224,13 @@ the function is called again. Setting `resend` to `True` overrides this behavior
 email address in the gradebook.
 
 Note that this function will send emails only to students for whom graded exam files are found.
+
+
+## Version changes
+
+**1.4** 
+- Added an option to indicate which pages should be skipped from grading by setting their maximal score to 0. 
+- Added an option to batch process files to prepare them for grading. 
+- `qr_prefix` can be now an empty string. 
+- Restructured `prepare_grading_tools` to simplify processing pages with missing data. 
+- Some bug fixes. 
