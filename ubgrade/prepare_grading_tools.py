@@ -7,6 +7,7 @@ import glob
 import io
 import json
 import shutil
+from datetime import datetime
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -310,123 +311,8 @@ class PrepareGrading(GradingBase):
         return str(person_number)
 
 
-    def missing_qr_handler(self, scans, page_num, page_image, get_missing_data):
-
-        '''
-        For a pdf page where QR code is not found, this function asks for user input.
-
-        :scans:
-            The name of the file with which the pdf page is a part of.
-        :page_num:
-            The page number of the pdf page within the scans file.
-        :page_image:
-            A numpy array with the image of the page.
-        :get_missing_data:
-            Boolean. If False do nothing.
-
-        Returns:
-            A tuple (qr, qr_found) where qr is either None or a string with the QR code of the page
-            provided by the user. qr_found is a boolean, True if the user entered a QR code.
-        '''
-
-        if not get_missing_data:
-            qr = None
-            qr_found = False
-            return qr, qr_found
-
-        # display an image of the page
-        plt.figure(figsize = (15,20))
-        plt.imshow(page_image)
-        plt.show()
-
-        # input prompting for user feedback
-        msg = "\n\n"
-        msg += f"File: {scans}\n"
-        msg += f"Page: {page_num}\n"
-        msg += "QR code not found. \n\n"
-        msg += "Enter the exam code or 's' to skip for now: "
-        qr = input(msg)
-
-        qr = qr.strip()
-        if qr == "s":
-            qr_found = False
-        else:
-            qr_found = True
-
-        return qr, qr_found
-
-
-    def missing_pnum_handler(self, pnum, gradebook_df, scans, page_num, page_image, get_missing_data, show_page):
-
-        '''
-        For a pdf page with exam cover the student person number was not correctly read this function asks for user input.
-
-        :pnum:
-            The person number read from the page. This function is called is when this number does not match any person
-            number on the roster of students taking the exam.
-        :gradebook_df:
-            Pandas dataframe with person numbers of students takinmg the exam. Used to verify that the user entry matches
-            one of these numbers. If the person number read from the exam page or provided by the user does not match
-            any number in gradebook_df, the user will have an option to add the number to the dataframe.
-        :scans:
-            The name of the file with which the pdf page is a part of.
-        :page_num:
-            The page number of the pdf page within the scans file.
-        :page_image:
-            A numpy array with the image of the page.
-        :get_missing_data:
-            Boolean. If False do nothing.
-        :show_page:
-            Boolean. A flag indicating if the page should be displayed to the user. If it has been already once displayed
-            to ask for the QR code, we don't need to display it again.
-
-        Returns:
-            A tuple (pnum, pnum_found, gradebook_df) where pnum is either None or a string with the person number, pnum_found
-            if pnum is a person number listed in gradebook_df, and gradebook_df is the dataframe - possibly modified by adding
-            a new person number.
-        '''
-
-        if not get_missing_data:
-            pnum = None
-            pnum_found = False
-            return pnum, pnum_found, gradebook_df
-
-        # display the page if needed
-        if show_page:
-            plt.figure(figsize = (15,20))
-            plt.imshow(page_image)
-            plt.show()
-
-        # user prompt
-        pnum_found = False
-        while not  pnum_found:
-            msg = "\n\n"
-            msg += f"File: {scans}\n"
-            msg += f"Page: {page_num}\n"
-            msg += f"Person number has been read as: {pnum}.\n"
-            msg += "This person number is not recognized.\n\n"
-            msg += f"Enter person number, or 'add' to add {pnum} to the gradebook, or 's' to skip for now: "
-            new_pnum = input(msg)
-            new_pnum = new_pnum.strip()
-            if new_pnum == "s":
-                pnum = None
-                pnum_found = False
-                break
-            elif new_pnum == "add":
-                new_row = {self.pnum_column:[pnum]}
-                new_row_df = pd.DataFrame(new_row)
-                gradebook_df = gradebook_df.append(new_row_df, sort=False).reset_index().drop(columns = ["index"])
-                pnum_found = True
-                break
-            else:
-                pnum = new_pnum
-                pnum_found = (pnum in gradebook_df[self.pnum_column].values)
-
-        return pnum, pnum_found, gradebook_df
-
-
-
-    def read_scans(self, scans, get_missing_data=False):
+   
+    def read_scans(self, scans):
 
         '''
         Given a pdf file with scanned exams:
@@ -448,22 +334,17 @@ class PrepareGrading(GradingBase):
             None
         '''
 
-
-        # create a temporary directory to store individial exam pages
+        # create a temporary directory to store individual exam pages
         if not os.path.exists(self.pages_dir):
             os.makedirs(self.pages_dir)
         # create a directory there files assembled by problem and prepared for grading will be saved
         if not os.path.exists(self.for_grading_dir):
             os.makedirs(self.for_grading_dir)
 
-        # flag indicating whether we are processing the file  collecting pages with missing QR/person number data
-        processing_missing_data_file = ((os.path.realpath(scans) ==  os.path.realpath(self.missing_data_pages)))
-
         # read gradebook, add qr_code column if needed
         gradebook_df = pd.read_csv(self.gradebook, converters={self.pnum_column : str, self.qr_code_column : str})
         if self.qr_code_column not in gradebook_df.columns:
             gradebook_df[self.qr_code_column] = ""
-        gradebook_df[self.qr_code_column] = gradebook_df[self.qr_code_column].astype('O')
 
         # writer object for collecting pages with missing data
         missing_data_writer = pdf.PdfFileWriter()
@@ -471,24 +352,18 @@ class PrepareGrading(GradingBase):
         # flag indicating if the file collecting pages with missing data already exists
         had_missing_file = os.path.isfile(self.missing_data_pages)
 
-        # a list where we will collect information about pages with missing data we encounter
-        missing_data = []
+        # a list with information about pages with missing QR/person number data
+        missing_data = self.get_grading_data()["missing_data"]
 
-        if not processing_missing_data_file:
-            missing_data = self.get_grading_data()["missing_data"]
-            # if a file with pages with missing data already exists, copy its
-            # content to missing_data_writer; newly discovered pages with missing data
-            # will be appened to it
-            if had_missing_file:
-                missing_data_file = open(self.missing_data_pages, 'rb')
-                missing_data_pdf = pdf.PdfFileReader(missing_data_file)
-                missing_data_writer.appendPagesFromReader(missing_data_pdf)
-        # when processing a file with pages with missing data we will need a copy of
-        # information about these pages
-        else:
-            previous_missing_data  = self.get_grading_data()["missing_data"]
+        # if a file with pages with missing data already exists, copy its
+        # content to missing_data_writer; newly discovered pages with missing data
+        # will be appened to it
+        if had_missing_file:
+            missing_data_file = open(self.missing_data_pages, 'rb')
+            missing_data_pdf = pdf.PdfFileReader(missing_data_file)
+            missing_data_writer.appendPagesFromReader(missing_data_pdf)
 
-        # read scans; the file needs to remind open since pdf.PdfFileReader
+        # read scans; the file needs to remain open since pdf.PdfFileReader
         # uses directly this file object - it does not copy it to the memory
         with open(scans, 'rb') as f:
             scanned_pdf = pdf.PdfFileReader(f)
@@ -497,115 +372,283 @@ class PrepareGrading(GradingBase):
             # iterate over pages of the file
             for n in range(num_pages):
 
-                # flag indicating if the exam page is to be displayed
-                # if data is missing
-                show_page = True
-
                 # convert the page into a numpy array
                 page = pdf.PdfFileWriter()
                 page.addPage(scanned_pdf.getPage(n))
                 page_image = pdfpage2img(page)
 
                 # get QR code from the page
-                qr_list = enhanced_qr_decode(page_image)
-
-                # check is a QR code was found on the page
-                # if not found, call missing_qr_handler
-                qr_found = (len(qr_list) != 0)
+                try:
+                    qr_list = enhanced_qr_decode(page_image)
+                    qr_found = (len(qr_list) != 0)
+                except:
+                    qr_found = False
+                  
                 if qr_found:
                     qr = qr_list[0].data.decode('utf8')
+                    qr_code = ExamCode(qr)
                 else:
-                    qr, qr_found = self.missing_qr_handler(scans = scans,
-                                                            page_num = n+1,
-                                                            page_image = page_image,
-                                                            get_missing_data  = get_missing_data
-                                                            )
-                    show_page = False
+                    qr = None
 
-                    # if qr code data is still missing, add the page to the missing data
-                    # file, if meeded, and go to the next page
-                    if not qr_found:
-                        # if we are processing the missing data file we want to keep the information
-                        # where the pages of this file originally came from
-                        if processing_missing_data_file:
-                            page_data = previous_missing_data[n]
-                        else:
-                            page_data = [os.path.basename(scans), n]
-                        if page_data not in missing_data:
-                            missing_data_writer.addPage(scanned_pdf.getPage(n))
-                            missing_data.append(page_data)
-                        continue
+                # if QR code was found and the page is not a cover page, 
+                # save the  page as a pdf file, the file name is the QR code of the page
+                # then contionue to the next page
+                if qr_found and (not qr_code.is_cover()):
+                    page_file = os.path.join(self.pages_dir, qr + ".pdf")
+                    with open(page_file , 'wb') as f:
+                        page.write(f)
+                    print(qr + 40*" " + "\r", end="")
+                    continue
 
-                # if qr code was found get person number (if cover page)
-                qr_code = ExamCode(qr)
-                # check if cover page, if so read the person number
-                # and record the QR code in the gradebook
-                if qr_code.is_cover():
+                # if cover read the person number
+                # also, attempt to read person number on pages where  
+                # QR code was not found, so we can process them appropriately later
+                else:
                     # read the person number
-                    pnum = self.read_bubbles(page_image)
+                    try:
+                        pnum = self.read_bubbles(page_image)
+                    except:
+                        pnum = None
 
                     # check if the person number read is in the gradebook
-                    # if not found, call missing_pnum_handler
-                    pnum_found = (pnum in gradebook_df[self.pnum_column].values)
-                    if not pnum_found:
-                        pnum, pnum_found, gradebook_df = self.missing_pnum_handler(pnum = pnum,
-                                                                                   gradebook_df = gradebook_df,
-                                                                                   scans = scans,
-                                                                                   page_num = n+1,
-                                                                                   page_image = page_image,
-                                                                                   get_missing_data = get_missing_data,
-                                                                                   show_page = show_page
-                                                                                   )
-                        if not pnum_found:
-                            # if we are processing the missing data file we want to keep the information
-                            # where the pages of this file originally came from
-                            if processing_missing_data_file:
-                                page_data = previous_missing_data[n]
-                            else:
-                                page_data = [os.path.basename(scans), n]
-                            if page_data not in missing_data:
-                                missing_data_writer.addPage(scanned_pdf.getPage(n))
-                                missing_data.append(page_data)
-                            continue
+                    pnum_found = (pnum is not None) and (pnum in gradebook_df[self.pnum_column].values)
 
-                    print(f"person_number: {pnum}\r", end="")
-
+                    if pnum_found:
+                        print(f"person_number: {pnum}" + 40*" " + "\r", end="")
+                
+                # if we have found all data on a cover page, save the page and record the 
+                # QR code in the gradebook
+                # then contine to the next page
+                if qr_found and qr_code.is_cover() and pnum_found:
                     # find the number of the row in the dataframe with the person number
                     i = np.flatnonzero(gradebook_df[self.pnum_column].values == pnum)[0]
                     # record the QR code of a student exam in the gradebook
                     gradebook_df.loc[i, self.qr_code_column] = qr_code.get_exam_code()
+                    # save the exam page as a pdf file, the file name is the QR code of the page
+                    page_file = os.path.join(self.pages_dir, qr + ".pdf")
+                    with open(page_file , 'wb') as f:
+                        page.write(f)
+                    print(qr + 40*" " + "\r", end="")
+                    continue
+                
+                # for pages with missing data, record page data 
+                page_missing_data = self.page_missing_data.copy()
+                page_missing_data["fname"] = os.path.basename(scans)
+                page_missing_data["page"] = n
+                page_missing_data["qr"] = qr if qr_found else None
+                page_missing_data["pnum"] = pnum
 
-                # save the exam page as a pdf file, the file name is the QR code of the page
-                page_file = os.path.join(self.pages_dir, qr + ".pdf")
-                with open(page_file , 'wb') as f:
-                    page.write(f)
-                    print(qr + "\r", end="")
+                if page_missing_data not in missing_data:
+                    missing_data.append(page_missing_data)
+                    missing_data_writer.addPage(scanned_pdf.getPage(n))
 
-        # save the missing pages file or remove if empty
-        if missing_data_writer.getNumPages() > 0:
+        # if there are pages with missing data, save them
+        if len(missing_data) > 0:
             temp_file = self.missing_data_pages + "_temp"
             with open(temp_file, 'wb') as f:
                 missing_data_writer.write(f)
             if had_missing_file:
-                if not processing_missing_data_file:
-                    missing_data_file.close()
+                missing_data_file.close()
                 os.remove(self.missing_data_pages)
             os.rename(temp_file, self.missing_data_pages)
             grading_data = self.get_grading_data()
             grading_data["missing_data"] = missing_data
             self.set_grading_data(grading_data)
 
-        # if there are no pages with missing data:
-        else:
-            if had_missing_file:
-                os.remove(self.missing_data_pages)
-            grading_data = self.get_grading_data()
-            grading_data["missing_data"] = []
-            self.set_grading_data(grading_data)
-
         # save the gradebook
         gradebook_df.to_csv(self.gradebook, index=False)
 
+
+    def get_missing_data(self):
+        '''
+        Processes the file self.missing_data_pages which consists of pages where 
+        QR code or person number could not be correctly read by the read_scans
+        function. This function displays these pages, and asks the user to enter 
+        the missing data.  
+
+        Returns:
+            None. 
+        '''
+
+        if not os.path.isfile(self.missing_data_pages):
+            print(f"File {self.missing_data_pages} not found.")
+            return None
+
+        if not os.path.exists(self.pages_dir):
+            os.makedirs(self.pages_dir)
+        
+        # read gradebook, add qr_code column if needed
+        gradebook_df = pd.read_csv(self.gradebook, converters={self.pnum_column : str, self.qr_code_column : str})
+        if self.qr_code_column not in gradebook_df.columns:
+            gradebook_df[self.qr_code_column] = ""
+
+        
+        # writer object for collecting pages with missing data
+        missing_data_writer = pdf.PdfFileWriter()
+
+        # read pdf  with missing data
+        missing_data_file = open(self.missing_data_pages, 'rb')
+        missing_data_pdf = pdf.PdfFileReader(missing_data_file)
+
+        # a list with information about pages with missing QR/person number data
+        missing_data = self.get_grading_data()["missing_data"]
+
+        # a list for recording information about pages that will be skipped by the user
+        new_missing_data = []
+        
+        num_pages = missing_data_pdf.numPages
+
+        # iterate over pages of the file
+        for n in range(num_pages):
+
+            page_data = missing_data[n]
+            qr = page_data["qr"]
+            pnum  = page_data["pnum"]
+            
+            page = pdf.PdfFileWriter()
+            page.addPage(missing_data_pdf.getPage(n))
+
+            # check if we need to do anything - perhaps QR code is already known, 
+            # person number has been added to the gradebook by the user manually, 
+            # and so there is no need to display the page 
+            if (qr is not None) and  ExamCode(qr).is_cover():
+                # check if the person number was read and if it exists in the gradebook
+                if (pnum is not None) and (pnum in gradebook_df[self.pnum_column].values):
+                    # if all is fine, save the page
+                    page_file = os.path.join(self.pages_dir, qr + ".pdf")
+                    with open(page_file , 'wb') as f:
+                        page.write(f)
+                    print(qr + 40*" " + "\r", end="")
+                    continue
+
+
+            # display an image of the page
+            page_image = pdfpage2img(page)
+            plt.figure(figsize = (15,20))
+            plt.imshow(page_image)
+            plt.show()
+
+            # handle missing QR code case
+            
+            if qr is None:
+                
+                msg = "\n\n" + 30*"-" + "\n"
+                msg += f"File: {page_data['fname']}\n"
+                msg += f"Page: {page_data['page'] + 1}\n"
+                msg += "QR code not found. \n\n"
+                msg += "Enter the QR code or 's' to skip for now: "
+                new_qr = input(msg).strip()
+
+                # if page is skipped record it in new missing data
+                if new_qr == "s":
+                    missing_data_writer.addPage(missing_data_pdf.getPage(n))
+                    new_missing_data.append(page_data)
+                    continue
+                else:
+                    qr = new_qr
+
+            # if QR code was provided by the user:
+
+            qr_code = ExamCode(qr)
+
+            # if not cover page, save it to a file, and continue to the next page
+            if not qr_code.is_cover():
+                    
+                page_file = os.path.join(self.pages_dir, qr + ".pdf")
+                with open(page_file , 'wb') as f:
+                    page.write(f)
+                print(qr + 40*" " + "\r", end="")
+                continue
+
+            pnum_found = (pnum is not None) and (pnum in gradebook_df[self.pnum_column].values)
+
+            # if person number data is already known, records the QR code in the gradebook, 
+            # save the file and continue to the next page
+            if  pnum_found:
+                # find the number of the row in the dataframe with the person number
+                i = np.flatnonzero(gradebook_df[self.pnum_column].values == pnum)[0]
+                # record the QR code of a student exam in the gradebook
+                gradebook_df.loc[i, self.qr_code_column] = qr_code.get_exam_code()
+                # save the exam page as a pdf file, the file name is the QR code of the page
+                page_file = os.path.join(self.pages_dir, qr + ".pdf")
+                with open(page_file , 'wb') as f:
+                    page.write(f)
+                print(qr + 40*" " + "\r", end="")
+                continue
+
+            # the remaining case is a cover page with missing person number
+            while not pnum_found:
+
+                msg = "\n\n" + 30*"-" + "\n"
+                msg += f"File: {page_data['fname']}\n"
+                msg += f"Page: {page_data['page'] + 1}\n"
+                if pnum is None:
+                    msg += "Person number has not been found on this page\n\n" 
+                    msg += f"Enter person number, or 's' to skip for now: "
+                else:
+                    msg += f"Person number has been read as: {pnum}.\n"
+                    msg += "This person number is not listed in the gradebook.\n\n"
+                    msg += f"Enter person number, or 'add' to add {pnum} to the gradebook, or 's' to skip for now: "
+                new_pnum = input(msg)
+                new_pnum = new_pnum.strip()
+
+                if new_pnum ==  "s":
+                    break
+                elif (pnum is not None) and  (new_pnum ==  "add"):
+                    break
+                # is person number is provided by the user, check if it appears in the gradebook
+                else:
+                    pnum = new_pnum
+                    pnum_found = (pnum in gradebook_df[self.pnum_column].values)
+
+            # if page is skipped, record it in new missing data
+            if new_pnum  == "s":
+                missing_data_writer.addPage(missing_data_pdf.getPage(n))
+                page_data["qr"] = qr
+                new_missing_data.append(page_data)
+                continue
+
+            if new_pnum == "add":
+                if self.pnum_time_column not in gradebook_df.columns:
+                    gradebook_df[self.pnum_time_column] = ""
+                now = datetime.now()
+                dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+                new_row = {self.pnum_column:[pnum], self.pnum_time_column: [dt_string]}
+                new_row_df = pd.DataFrame(new_row)
+                gradebook_df = gradebook_df.append(new_row_df, sort=False).reset_index().drop(columns = ["index"])
+                pnum_found = True
+            
+            # find the number of the row in the dataframe with the person number
+            i = np.flatnonzero(gradebook_df[self.pnum_column].values == pnum)[0]
+            # record the QR code of a student exam in the gradebook
+            gradebook_df.loc[i, self.qr_code_column] = qr_code.get_exam_code()
+
+            # save the exam page as a pdf file, the file name is the QR code of the page
+            page_file = os.path.join(self.pages_dir, qr + ".pdf")
+            with open(page_file , 'wb') as f:
+                page.write(f)
+            print(qr + 40*" " + "\r", end="")
+
+        # if there are pages with missing data, save them
+        if len(new_missing_data) > 0:
+            temp_file = self.missing_data_pages + "_temp"
+            with open(temp_file, 'wb') as f:
+                missing_data_writer.write(f)
+
+            missing_data_file.close()
+            os.remove(self.missing_data_pages)
+            os.rename(temp_file, self.missing_data_pages)
+        else: 
+            missing_data_file.close()
+            os.remove(self.missing_data_pages)
+
+        #save grading data
+        grading_data = self.get_grading_data()
+        grading_data["missing_data"] = new_missing_data
+        self.set_grading_data(grading_data)
+
+        # save the gradebook
+        gradebook_df.to_csv(self.gradebook, index=False)
 
 
     def assemble_by_problem(self):
@@ -665,7 +708,7 @@ class PrepareGrading(GradingBase):
 
 
 
-    def prepare_grading(self, files=None):
+    def prepare_grading(self, files=None, batch=False):
 
         '''
         Prepares exams for grading:
@@ -686,6 +729,11 @@ class PrepareGrading(GradingBase):
             previous runs of this function.
             - If 'all' all files will be processed without exceptions.
             - If a list, only files on the list will be processed.
+        :batch:
+            Boolean. It True, pages with missing QR codes or person number will be recorded and 
+            saved into a separate file, but there will be no attempt to ask the user to provide 
+            the missing data. The missing data can be then added by the user at a later time, 
+            by tunning this function again with batch=False. 
 
         Returns:
             None
@@ -729,13 +777,13 @@ class PrepareGrading(GradingBase):
             if not os.path.exists(fpath):
                 print(f"File {f} not found, omitting.")
                 continue
-            self.read_scans(scans = fpath, get_missing_data=False)
+            self.read_scans(scans = fpath)
             processed.append(f)
 
         # get information about pages with missing QR/person number data
-        if  os.path.isfile(self.missing_data_pages):
+        if  (not batch) and  os.path.isfile(self.missing_data_pages):
             print(f"Reading file:  {os.path.basename(self.missing_data_pages)}\n")
-            self.read_scans(scans = self.missing_data_pages, get_missing_data=True)
+            self.get_missing_data()
 
 
         print("Adding score tables..." + 40*" ")
