@@ -227,8 +227,11 @@ Note that this function will send emails only to students for whom graded exam f
 
 
 ## Version changes
+]
+**0.1.5**
+- Reliability improvements in email tools. 
 
-**1.4** 
+**0.1.4** 
 - Added an option to indicate which pages should be skipped from grading by setting their maximal score to 0. 
 - Added an option to batch process files to prepare them for grading. 
 - `qr_prefix` can be now an empty string. 
