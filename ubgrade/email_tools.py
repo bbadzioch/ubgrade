@@ -150,6 +150,7 @@ class EmailGradedExams(GradingBase):
         # for each gradebook row
         gradebook_df = pd.read_csv(self.gradebook)
         gradebook_df = gradebook_df[gradebook_df[self.qr_code_column].notnull()]
+        gradebook_df = gradebook_df[gradebook_df[self.email_column].notnull()]
         gradebook_dict = gradebook_df.to_dict(orient='records')
 
         # get email subject and email text template
@@ -174,15 +175,16 @@ class EmailGradedExams(GradingBase):
             pdf_fname = os.path.join(self.graded_dir, f"{record[self.qr_code_column]}.pdf")
 
             # get recipient email address
-            if  '@' in record['email']:
+            email_str = str(record['email']).strip()
+            if  '@' in email_str:
                 to_address = record['email'].strip()
             else:
-                to_address = record['email'].strip() + "@buffalo.edu"
+                to_address = email_str + "@buffalo.edu"
 
             # check is the message was previously sent
-            if (not send_sample) and (not resend) and (to_address in emails_sent):
-                print(f"{to_address:30} *********** WAS SENT BEFORE, OMITTING")
-                continue
+            #if (not send_sample) and (not resend) and (to_address in emails_sent):
+            #    print(f"{to_address:30} *********** WAS SENT BEFORE, OMITTING")
+            #    continue
 
             # check if pdf file exists, if it does not, skip
             if not os.path.isfile(pdf_fname):
@@ -204,23 +206,24 @@ class EmailGradedExams(GradingBase):
             # send email
             send_success = False
             while not send_success:
+
                 try:
                     server = smtplib.SMTP_SSL(self.smtp_server, self.server_port)
                     server.login(login_name, password)
-                except smtplib.SMTPAuthenticationError:
-                    print("Login name or password incorrect, exiting")
-                    return None
-                try:
                     server.send_message(msg, from_addr = from_address, to_addrs = to_address)
-                except smtplib.SMTPException as ex:
-                    print("{:30} *********** NOT SENT: {}".format(to_address, ex))
-                    #pause before reattempting to send the message
-                    self.timer(self.reconnect_period)
-                else:
                     print("{:30} *********** SENT".format(to_address))
-                    send_success = True
                     server.quit()
+                    send_success = True
                     sleep(0.1)
+                except smtplib.SMTPException as ex:
+                    if ex.__class__ == smtplib.SMTPAuthenticationError:
+                         print("Login name or password incorrect, exiting")
+                         return None
+                    else:
+                        print("{:30} *********** NOT SENT: {}".format(to_address, ex))
+                        #pause before reattempting to send the message
+                        self.timer(self.reconnect_period)
+
             if send_sample:
                 break
             else:
