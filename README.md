@@ -227,7 +227,7 @@ Note that this function will send emails only to students for whom graded exam f
 
 
 ## Version changes
-]
+
 **0.1.5**
 - Reliability improvements in email tools. 
 
