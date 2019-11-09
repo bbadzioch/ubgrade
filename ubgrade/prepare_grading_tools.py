@@ -779,15 +779,19 @@ class PrepareGrading(GradingBase):
         # files with data missing are collected in the self.missing_data_pages
         # file, to be processed later
         for f in file_list:
+            
             print(f"Reading file:  {f}")
             fpath = os.path.join(self.scans_dir, f)
             if not os.path.exists(fpath):
                 print(f"File {f} not found, omitting.")
                 continue
+
+            # rotate pdf pages
             if rotate is None:
                 detect_and_rotate(pdfin = fpath)
             else:
                 rotate_pdf(angle = rotate, pdfin = fpath)
+
             self.read_scans(scans = fpath)
             processed.append(f)
 
