@@ -1,6 +1,6 @@
 from ubgrade.grading_base import GradingBase
 from ubgrade.exam_code import ExamCode
-from ubgrade.helpers import pdfpage2img, enhanced_qr_decode, merge_pdfs
+from ubgrade.helpers import pdfpage2img, enhanced_qr_decode, merge_pdfs, rotate_pdf, detect_and_rotate
 
 import os
 import glob
@@ -708,7 +708,7 @@ class PrepareGrading(GradingBase):
 
 
 
-    def prepare_grading(self, files=None, batch=False):
+    def prepare_grading(self, files=None,  rotate=None, batch=False):
 
         '''
         Prepares exams for grading:
@@ -729,6 +729,13 @@ class PrepareGrading(GradingBase):
             previous runs of this function.
             - If 'all' all files will be processed without exceptions.
             - If a list, only files on the list will be processed.
+        :rotate:
+            This argument can be an integer (a multiple of 90) giving the angle by which all pages 
+            of pdf files should rotated clockwise to bring them to the correct orientation. If None, 
+            the angle or rotation of each file will be automatically detected, using the assumption 
+            that on a correctly oriented page the QR code is located in the upper right corner. 
+            The angle automatic detection will check the angle of rotation for each pdf file separately, 
+            but all pages in a given file will be rotated by the same angle.  
         :batch:
             Boolean. It True, pages with missing QR codes or person number will be recorded and 
             saved into a separate file, but there will be no attempt to ask the user to provide 
@@ -777,6 +784,10 @@ class PrepareGrading(GradingBase):
             if not os.path.exists(fpath):
                 print(f"File {f} not found, omitting.")
                 continue
+            if rotate is None:
+                detect_and_rotate(pdfin = fpath)
+            else:
+                rotate_pdf(angle = rotate, pdfin = fpath)
             self.read_scans(scans = fpath)
             processed.append(f)
 

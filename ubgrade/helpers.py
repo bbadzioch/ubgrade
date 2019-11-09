@@ -5,7 +5,7 @@ import PyPDF2 as pdf
 import os
 import pyzbar.pyzbar as pyz
 import cv2
-
+import shutil
 
 def pdfpage2img(pdf_page, dpi=200):
 
@@ -163,3 +163,110 @@ def enhanced_qr_decode(img, xmax=5, ymax=5):
             if len(qr) != 0:
                 break
     return qr
+
+
+def get_rotation(img):
+    """
+    Get the angle of rotation of an exam page with a QR code. 
+    The function assumes that the QR code on a unrotated page 
+    is placed in the upper right corner. 
+    
+    :img:
+        A numpy array with the image of the page. 
+    
+    Returns:
+        The angle of rotation (counterclockwise) or None is QR code is not 
+        found on the page. 
+    """
+
+    h, w, *_ = img.shape
+    qr = enhanced_qr_decode(img)
+    if not qr:
+        return None
+    left = qr[0].rect.left
+    top =  qr[0].rect.top
+    vert = top/h
+    horiz = left/w
+    if vert < 0.5 and horiz > 0.5:
+        return 0
+    if vert < 0.5 and horiz < 0.5:
+        return 90
+    if vert > 0.5 and horiz < 0.5:
+        return 180
+    if vert > 0.5 and horiz > 0.5:
+        return 270
+    return None
+
+
+def rotate_pdf(angle, pdfin, pdfout = None):
+    """
+    Rotate a pdf file
+    
+    :angle:
+        Angle of rotation (clockwise). Must be a multiple of 90. 
+    :pdfin:
+        Name of the pdf file to be rotated. 
+    :pdfout:
+        Name of the output pdf file. If None, the file pdfin 
+        will be replaced with the rotated file. 
+    
+    Returns:
+        None. 
+    """
+    
+    if pdfout is None:
+        pdfout = pdfin
+        
+    pdf_in = open(pdfin, 'rb')
+    pdf_reader = pdf.PdfFileReader(pdf_in)
+    pdf_writer = pdf.PdfFileWriter()
+
+    for pagenum in range(pdf_reader.numPages):
+        page = pdf_reader.getPage(pagenum)
+        page.rotateClockwise(angle)
+        pdf_writer.addPage(page)
+        
+    temp_pdfout = pdfout if pdfout != pdfin else pdfout + "_temp"
+    pdf_out = open(temp_pdfout, "wb")
+    pdf_writer.write(pdf_out)
+    pdf_out.close()
+    pdf_in.close()
+    os.rename(temp_pdfout, pdfout)
+
+
+def detect_and_rotate(pdfin, pdfout = None):
+    """
+    Detects the orientation of pages of a pdf file and rotates the
+    file accordingly to bring it to the unrotated position. It is 
+    assumed that the orientation of all pages in the file is the same 
+    (so all of pages need to be rotated by the same angle), and that 
+    at least one page has a QR code embedded which after the rotation 
+    should be located in the upper righ corner. 
+
+    :pdfin:
+        Name of the pdf file to be rotated. 
+    :pdfout:
+        Name of the output pdf file. If None, the file pdfin 
+        will be replaced with the rotated file. 
+
+    Returns:
+        None. 
+    """
+
+    pdf_in = open(pdfin, 'rb')
+    pdf_reader = pdf.PdfFileReader(pdf_in)
+
+    rotation = None
+    for pagenum in range(pdf_reader.numPages):
+        page = pdf_reader.getPage(pagenum)
+        pdf_writer = pdf.PdfFileWriter()
+        pdf_writer.addPage(page)
+        page_img = pdfpage2img(pdf_writer)
+        rotation = get_rotation(page_img)
+        if rotation is not None:
+            break
+
+    if rotation is None:
+        shutil.copyfile(pdfin, pdfout) 
+    else:
+        rotate_pdf(rotation, pdfin, pdfout)
