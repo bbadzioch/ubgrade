@@ -76,7 +76,7 @@ Place the file in the main grading directory. We will refer to this file as
 The signature of this function is as follows:
 
 ```
-ubgrade.prep_grading(maxpoints, main_dir = None, gradebook = None, batch = False, files = None, init_grading_data = False)
+ubgrade.prep_grading(maxpoints, main_dir = None, gradebook = None, rotate = None, batch = False, files = None, init_grading_data = False)
 ```
 
 * `maxpoints`: A list with the maximal possible score of each exam page.
@@ -90,6 +90,14 @@ added to it etc.
 * `gradebook`: The name of the gradebook file. This file needs to be located in
 the main grading directory. If `None` it will be assumed that the file name
 is `gradebook.csv`
+
+* `rotate`: This argument can be an integer (a multiple of 90) giving
+the angle by which all pages of pdf files should rotated clockwise to bring them 
+to the correct orientation. If `None`, the angle of rotation of each file will be 
+automatically detected, using the assumption that on a correctly oriented page 
+the QR code is located in the upper right corner. The  automatic angle detection 
+will check the angle of rotation for each pdf file separately, but all pages in 
+a given file will be rotated by the same angle.  
 
 * `batch`: Boolean. By default, if the function encounters pages where QR code
 or person number which be read, it will ask the user to enter this
@@ -229,11 +237,11 @@ Note that this function will send emails only to students for whom graded exam f
 ## Version changes
 
 **0.1.5**
-- Reliability improvements in email tools. 
+- Reliability improvements in email tools.
 
-**0.1.4** 
-- Added an option to indicate which pages should be skipped from grading by setting their maximal score to 0. 
-- Added an option to batch process files to prepare them for grading. 
-- `qr_prefix` can be now an empty string. 
-- Restructured `prepare_grading_tools` to simplify processing pages with missing data. 
-- Some bug fixes. 
+**0.1.4**
+- Added an option to indicate which pages should be skipped from grading by setting their maximal score to 0.
+- Added an option to batch process files to prepare them for grading.
+- `qr_prefix` can be now an empty string.
+- Restructured `prepare_grading_tools` to simplify processing pages with missing data.
+- Some bug fixes.

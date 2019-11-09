@@ -732,9 +732,9 @@ class PrepareGrading(GradingBase):
         :rotate:
             This argument can be an integer (a multiple of 90) giving the angle by which all pages 
             of pdf files should rotated clockwise to bring them to the correct orientation. If None, 
-            the angle or rotation of each file will be automatically detected, using the assumption 
+            the angle of rotation of each file will be automatically detected, using the assumption 
             that on a correctly oriented page the QR code is located in the upper right corner. 
-            The angle automatic detection will check the angle of rotation for each pdf file separately, 
+            The automatic angle detection will check the angle of rotation for each pdf file separately, 
             but all pages in a given file will be rotated by the same angle.  
         :batch:
             Boolean. It True, pages with missing QR codes or person number will be recorded and 
