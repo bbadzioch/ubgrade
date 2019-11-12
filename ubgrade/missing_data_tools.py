@@ -15,7 +15,6 @@ import PyPDF2 as pdf
 import pdf2image
 
 
-
 def get_qr(page):
 
     # display an image of the page
@@ -72,7 +71,6 @@ def get_missing_data(main_dir = None, gradebook = None):
             missing.set_pnum(pnum)
 
     return len(missing.new_missing_data)
-
 
 
 class MissingData(GradingBase):
