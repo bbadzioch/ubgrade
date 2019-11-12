@@ -3,6 +3,7 @@ from ubgrade.helpers import pdf2pages
 import os
 import json
 import glob
+import shutil
 from reportlab.lib.units import inch
 
 
@@ -80,9 +81,14 @@ class GradingBase():
                                   "emails_sent" : []
                                   }
         if init_grading_data:
+            # remove grading data
             self.set_grading_data(self.init_grading_data)
+            # remove missing pages
             if os.path.isfile(self.missing_data_pages):
                  os.remove(self.missing_data_pages)
+            # remove the directory with individual exam pages
+            if os.path.isdir(self.pages_dir):
+                shutil.rmtree(self.pages_dir)
 
 
         # Columns of the self.gradebook file. The file must have the self.pnum_column to start the grading
@@ -140,12 +146,12 @@ class GradingBase():
             The directory where the pdf files with exam pages will be saved.
         '''
 
-        files = glob.glob(os.path.join(self.for_grading_dir, "*page_*.pdf"))
         page_lists = self.get_grading_data()["page_lists"]
 
-        for f in files:
-            f_list = page_lists[os.path.basename(f)]
+        for f in page_lists:
+            f_list = page_lists[f]
+            fname = os.path.join(self.for_grading_dir, f)
             def set_page_names(fname, n, page):
                 return f_list[n]
 
-            pdf2pages(f, output_fname=set_page_names, output_directory = dest_dir)
+            pdf2pages(fname, output_fname=set_page_names, output_directory = dest_dir)
