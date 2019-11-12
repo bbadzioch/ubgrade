@@ -483,7 +483,10 @@ class PrepareGrading(GradingBase):
         for f in files:
             fcode = ExamCode(f)
             # get the page number
-            files_dir[f] = fcode.get_page_num()
+            if fcode.get_exam_name() == "":
+                files_dir[f] = f"page_{fcode.get_page_num()}"
+            else:
+                files_dir[f] = f"{fcode.get_exam_name()}_page_{fcode.get_page_num()}"
 
         # create the set of page (or problem) numbers of the exam
         problems = set(files_dir.values())
@@ -495,16 +498,8 @@ class PrepareGrading(GradingBase):
             f_n = [f for f in files_dir if files_dir[f] == n]
             f_n.sort()
 
-            # qr prefix of the exam
-            exam_name = ExamCode(f_n[0]).get_exam_name()
-
-            if exam_name == "":
-                output = f"page_{n}"
-            else:
-                output = f"{exam_name}_page_{n}"
-
             # save the assembled problem file
-            output_fname = os.path.join(self.for_grading_dir, output + ".pdf")
+            output_fname = os.path.join(self.for_grading_dir, n + ".pdf")
             merge_pdfs(f_n , output_fname=output_fname)
 
             # record the list of pages in the assembled file
