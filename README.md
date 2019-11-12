@@ -56,23 +56,23 @@ pages will not be graded. This is intended for two-sided printing of the exam fi
 ## 2. Preparation for grading
 
 **2.1.** After the exam has been administered scan exam copies to pdf files.
-For best results use photo/text scanner setting. Black and white low resulution 
-scans may create problems. The scanned exam pages can be oriented sideways or 
-upside down. The orientation will be adjusted as needed, provided that all pages 
-in any given scanned file have the same orientation (different orientation in 
-different files is fine). 
+For best results use photo/text scanner setting. Black and white low resulution
+scans may create problems. The scanned exam pages can be oriented sideways or
+upside down. The orientation will be adjusted as needed, provided that all pages
+in any given scanned file have the same orientation (different orientation in
+different files is fine).
 
-**2.2.** Create a directory (which we will subsequently call *the main grading directory*) 
-in which all grading files will reside. Inside this directory create a subdirectory 
+**2.2.** Create a directory (which we will subsequently call *the main grading directory*)
+in which all grading files will reside. Inside this directory create a subdirectory
 named `scans` and place the scanned pdf files there.
 
 **2.3.** Create a csv file with the roster of students taking the exam. This file
 should have at least two columns. The column with the heading `person_number`
 should be populated with person numbers of students taking the exam. The column
-with the heading `email` should contain email addresses of students (which will 
-be needed to send graded exams back to students). Columns with other data 
-(student names etc.) can be included as well. The header row should be the first 
-row of the csv file. Place the file in the main grading directory. We will refer 
+with the heading `email` should contain email addresses of students (which will
+be needed to send graded exams back to students). Columns with other data
+(student names etc.) can be included as well. The header row should be the first
+row of the csv file. Place the file in the main grading directory. We will refer
 to this file as *the gradebook file*.
 
 **2.4.** Use the function `ubgrade.prep_grading` to prepare grading files.
@@ -95,11 +95,11 @@ the main grading directory. If `None` it will be assumed that the file name
 is `gradebook.csv`
 
 * `rotate`: This argument can be an integer (a multiple of 90) giving
-the angle by which all pages of pdf files should rotated clockwise to bring them 
-to the correct orientation. If `None` (default), the angle of rotation of each file will be 
-automatically detected, using the assumption that on a correctly oriented page 
-the QR code is located in the upper right corner. The  automatic angle detection 
-will check the angle of rotation for each pdf file separately, but all pages in 
+the angle by which all pages of pdf files should rotated clockwise to bring them
+to the correct orientation. If `None` (default), the angle of rotation of each file will be
+automatically detected, using the assumption that on a correctly oriented page
+the QR code is located in the upper right corner. The  automatic angle detection
+will check the angle of rotation for each pdf file separately, but all pages in
 a given file will be rotated by the same angle.  
 
 * `batch`: Boolean. By default, if the function encounters pages where QR code
@@ -108,15 +108,15 @@ data. If `batch = True`, the function will instead quietly process all pages.
 Pages with missing data will be assembled into a separate pdf file, which can
 be processed at a later time by running this function again with `batch = False`.  
 
-* `files`: This argument specifies which files in the `scans` subdirectory should 
-be processed. If `None` (default) all files will be processed, except for the ones that 
-were already processed during previous runs of the function. This is what one should want 
-in most cases. If `files = "all"` all files will be processed, without exceptions. 
-The value of this argument can be also a list of file names, explicitly specifying which 
+* `files`: This argument specifies which files in the `scans` subdirectory should
+be processed. If `None` (default) all files will be processed, except for the ones that
+were already processed during previous runs of the function. This is what one should want
+in most cases. If `files = "all"` all files will be processed, without exceptions.
+The value of this argument can be also a list of file names, explicitly specifying which
 files in the `scans` subdirectory should be processed.
 
-* `init_grading_data`: Boolean. If `True` it will reset metadata used by the function, 
-in effect starting the preparation of grading files from scratch. Should be set to `False` 
+* `init_grading_data`: Boolean. If `True` it will reset metadata used by the function,
+in effect starting the preparation of grading files from scratch. Should be set to `False`
 (default) except in cases of some mishaps.
 
 This function performs the following tasks:
@@ -240,6 +240,12 @@ Note that this function will send emails only to students for whom graded exam f
 
 
 ## Version changes
+
+**0.1.6**
+- Added autorotation of scanned pdf files.
+- Bug fix: all files with the same exam page number were being saved in the same file for grading,
+  irrespective of the root of their QR code. This is fixed now.
+- Tools for handling pages with missing QR codes or person number rewritten and moved to a separate file.
 
 **0.1.5**
 - Reliability improvements in email tools.

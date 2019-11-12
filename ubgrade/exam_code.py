@@ -1,4 +1,5 @@
 import os
+import re
 
 class ExamCode():
 
@@ -10,6 +11,24 @@ class ExamCode():
         self.code = code
         self.head, self.tail = os.path.split(self.code)
         self.base, self.ext = os.path.splitext(self.tail)
+
+
+    def validate(self):
+
+        '''
+        Check if the format of a QR code is valid, i.e. consist is a (possibly empty)
+        prefix followed by CXXX-PXX where X denotes a digit. A code t_CXXX-PXX also valid
+        to allow for names of files with a score table and an empty prefix.  
+        '''
+
+        tokens = self.base.split("-")
+        if not len(tokens) >= 2:
+            return False
+        if re.match("^(t_)?C\d{3}$", tokens[-2]) and re.match("^P\d{2}$", tokens[-1]):
+            return True
+        else:
+            return False
+
 
     def has_table(self):
 
