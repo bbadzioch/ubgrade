@@ -13,7 +13,7 @@ class ExamCode():
         self.base, self.ext = os.path.splitext(self.tail)
 
 
-    def validate(self):
+    def valid(self):
 
         '''
         Check if the format of a QR code is valid, i.e. consist is a (possibly empty)
