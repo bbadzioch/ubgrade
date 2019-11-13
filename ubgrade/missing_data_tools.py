@@ -183,6 +183,11 @@ class MissingData(GradingBase):
             self.pnum  = self.page_data["pnum"]
             self.pdf_page = pdf.PdfFileWriter()
             self.pdf_page.addPage(self.missing_data_pdf.getPage(self.current_page_num))
+        else:
+            self.page_data = None
+            self.qr = None
+            self.pnum = None
+            self.pdf_page = None
 
 
     def next_page(self):
