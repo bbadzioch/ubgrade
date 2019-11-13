@@ -42,7 +42,7 @@ def get_qr(page):
     qr = input(msg).strip()
 
     # check is user input is valid, if not try again
-    while not (qr == 's' or  ExamCode(qr).validate()):          
+    while not (qr == 's' or  ExamCode(qr).valid()):          
         msg = "\n\n" + 30*"-" + "\n"
         msg += f"The code you entered '{qr}' is not valid. \n\n"
         msg += "Enter the QR code or 's' to skip for now: "
@@ -105,15 +105,9 @@ def get_missing_data(main_dir = None, gradebook = None):
         missing after this function is finished. 
     '''
 
-    missing = MissingData(main_dir = None, gradebook = None)
-    
-    while True:
-        # get a dictionary with page data
-        page = missing.get_missing_page()
-        # page is None is all pages in the missing data file 
-        # have been processed. 
-        if page is None:
-            break
+    missing_pages = MissingData(main_dir = None, gradebook = None)
+
+    for page in missing_pages:
         if page["missing_data"] == "qr":
             qr = get_qr(page)
             missing.set_qr(qr) 
@@ -138,7 +132,7 @@ class MissingData(GradingBase):
 
         GradingBase.__init__(self, main_dir, gradebook, init_grading_data = False)
 
-        # if there is no pdf file wih exam pages with missing data raise an exception
+        # if there is no pdf file wih exam pages with missing data, raise an exception
         if not os.path.isfile(self.missing_data_pages):
             raise Exception("File {self.missing_data_pages} not found.")
         
@@ -167,10 +161,9 @@ class MissingData(GradingBase):
         
         # total number of pages with in the pdf file with missing data
         self.num_pages = self.missing_data_pdf.numPages
-        # number of the page currecntly being processed
+
+        # number of the page currently being processed
         self.current_page_num = 0
-        # flag indicating that all pages have been processed 
-        self.finished = (self.current_page_num >= self.num_pages)
 
         # set additional properties
         self.set_page_data()
@@ -181,12 +174,15 @@ class MissingData(GradingBase):
         '''
         A method that sets additional properties of the currently processed page. 
         '''
-
-        self.page_data = self.missing_data[self.current_page_num]
-        self.qr = self.page_data["qr"]
-        self.pnum  = self.page_data["pnum"]
-        self.pdf_page = pdf.PdfFileWriter()
-        self.pdf_page.addPage(self.missing_data_pdf.getPage(self.current_page_num))
+        # flag indicating that all pages have been processed 
+        self.finished = (self.current_page_num >= self.num_pages)
+        
+        if not self.finished:
+            self.page_data = self.missing_data[self.current_page_num]
+            self.qr = self.page_data["qr"]
+            self.pnum  = self.page_data["pnum"]
+            self.pdf_page = pdf.PdfFileWriter()
+            self.pdf_page.addPage(self.missing_data_pdf.getPage(self.current_page_num))
 
 
     def next_page(self):
@@ -196,10 +192,7 @@ class MissingData(GradingBase):
         '''
 
         self.current_page_num += 1 
-        if self.current_page_num >= self.num_pages:
-            self.finished = True
-        else:
-            self.set_page_data()
+        self.set_page_data()
 
         
     def valid_pnum(self):
@@ -250,8 +243,7 @@ class MissingData(GradingBase):
     def cleanup(self):
 
         '''
-        Tasks to be performed when processing of pages with missing data
-        is finished. 
+        Tasks to be performed when processing of  missing data pages is finished. 
         '''
 
         # if there are pages with still missing data, save them
@@ -313,6 +305,7 @@ class MissingData(GradingBase):
             self.next_page()
 
         elif pnum == "add":
+            # add a timestamp to the gradebook indicating when the person number was added
             if self.pnum_time_column not in self.gradebook_df.columns:
                 self.gradebook_df[self.pnum_time_column] = ""
             now = datetime.datetime.now()
@@ -323,19 +316,21 @@ class MissingData(GradingBase):
         
         else:
             self.pnum = pnum
-            
 
-    def get_missing_page(self):
+    def __iter__(self):
+        return self
+
+    def __next__(self):
 
         '''
-        Returns dictionary with the next page to be processed, or None
+        Returns a dictionary with the next page to be processed, or None
         if all pages have been processed. 
         '''
 
         # if all pages have been processed perform cleanup, return None
         if self.finished:
             self.cleanup()
-            return None
+            raise StopIteration
 
         # iterate of over pages until the next page with missing data is found
         while True:
@@ -344,7 +339,7 @@ class MissingData(GradingBase):
                 self.next_page()
                 if self.finished:
                     self.cleanup()
-                    return None
+                    raise StopIteration
             else:
                 break
 
