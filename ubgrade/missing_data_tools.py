@@ -105,15 +105,9 @@ def get_missing_data(main_dir = None, gradebook = None):
         missing after this function is finished. 
     '''
 
-    missing = MissingData(main_dir = None, gradebook = None)
-    
-    while True:
-        # get a dictionary with page data
-        page = missing.get_missing_page()
-        # page is None is all pages in the missing data file 
-        # have been processed. 
-        if page is None:
-            break
+    missing_pages = MissingData(main_dir = None, gradebook = None)
+
+    for page in missing_pages:
         if page["missing_data"] == "qr":
             qr = get_qr(page)
             missing.set_qr(qr) 
@@ -322,9 +316,11 @@ class MissingData(GradingBase):
         
         else:
             self.pnum = pnum
-            
 
-    def get_missing_page(self):
+    def __iter__(self):
+        return self
+
+    def __next__(self):
 
         '''
         Returns a dictionary with the next page to be processed, or None
@@ -334,7 +330,7 @@ class MissingData(GradingBase):
         # if all pages have been processed perform cleanup, return None
         if self.finished:
             self.cleanup()
-            return None
+            raise StopIteration
 
         # iterate of over pages until the next page with missing data is found
         while True:
@@ -343,7 +339,7 @@ class MissingData(GradingBase):
                 self.next_page()
                 if self.finished:
                     self.cleanup()
-                    return None
+                    raise StopIteration
             else:
                 break
 

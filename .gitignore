@@ -38,6 +38,7 @@ pip-delete-this-directory.txt
 
 # Unit test / coverage reports
 htmlcov/
+unit_tests/
 .tox/
 .coverage
 .coverage.*
@@ -47,6 +48,7 @@ coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
+
 
 # Translations
 *.mo
