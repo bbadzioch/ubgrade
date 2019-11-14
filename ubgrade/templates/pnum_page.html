@@ -1,0 +1,18 @@
+{% extends "page_display.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+
+
+{% block message %}
+<p style="font-size: 18px; color:white;">
+    The person number number found on this page is <span style="font-family:monospace; color:aquamarine;">{{pnum}}</span>. 
+    This person number does not appear in the gradebook. 
+    <br/> Choose one of the following options:
+    <ul style="font-size: 18px; color:white;">
+        <li>Enter a different person number and click Submit.</li>
+        <li>Click Add to add <span style="font-family:monospace; color:aquamarine;">{{pnum}}</span> to the gradebook.</li>
+        <li>Click Skip to skip this page for now.</li>
+    </ul>
+</p>
+{% endblock %}
+       

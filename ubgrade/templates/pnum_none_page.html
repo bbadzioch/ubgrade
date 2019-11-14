@@ -1,0 +1,16 @@
+{% extends "page_display.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+
+
+{% block message %}
+<p style="font-size: 18px; color:white;">
+    Person number number was not found on this page.
+    <br/> Choose one of the following options:
+    <ul style="font-size: 18px; color:white;">
+        <li>Enter the person number and click Submit.</li>
+        <li>Click Skip to skip this page for now.</li>
+    </ul>
+</p>
+{% endblock %}
+       

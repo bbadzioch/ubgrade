@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h3 style="color:white;">{{message}}</h3>
+        {% block message %}
+        {% endblock %}
+    </div>
+
+{% endblock %}
+       
