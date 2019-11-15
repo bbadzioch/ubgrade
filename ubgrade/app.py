@@ -132,10 +132,16 @@ def pnum_handler():
 
 @app.route('/done', methods=['GET'])
 def finish_handler():
-
+    num_missing = len(missing_pages.new_missing_data)
+    if num_missing == 0:
+        message = "All pages have been processed."
+    elif num_missing == 1:
+        message = "There is one page remaining to be processes. To process it run 'prepare grading' again."
+    else:
+        message = f"There are {num_missing} pages remaining to be processes. To process them run 'prepare grading' again."
     return  render_template("prep_final.html", 
                             title = f"Completed", 
-                            message = "All pages have been processed."
+                            message = message
                             )
 
 if __name__ == "__main__":
