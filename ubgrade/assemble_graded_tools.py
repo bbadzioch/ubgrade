@@ -304,9 +304,6 @@ class AssembleGradedExams(GradingBase):
 
         gradebook_df =  pd.read_csv(self.gradebook, converters={self.qr_code_column : str})
 
-        # get graded exam files
-        files = glob.glob(os.path.join(self.for_grading_dir, "*page_*.pdf"))
-
         # split the graded files into pages and save them to a temporary directory
         temp_dir = tempfile.mkdtemp()
         self.split_for_grading_files(dest_dir = temp_dir)

@@ -482,11 +482,7 @@ class PrepareGrading(GradingBase):
         files_dir = {}
         for f in files:
             fcode = ExamCode(f)
-            # get the page number
-            if fcode.get_exam_name() == "":
-                files_dir[f] = f"page_{fcode.get_page_num()}"
-            else:
-                files_dir[f] = f"{fcode.get_exam_name()}_page_{fcode.get_page_num()}"
+            files_dir[f] = fcode.assembled_page_fname()
 
         # create the set of page (or problem) numbers of the exam
         problems = set(files_dir.values())

@@ -29,6 +29,45 @@ def pdfpage2img(pdf_page, dpi=200):
     return page_image
 
 
+    
+def insert_pdf_page(pdfin, page, index=0, pdfout=None):
+    """
+    Inserts a pdf page represented by a PyPDF2.pdf.PageObject
+    into a pdf file at a given page index (page indexing starts 
+    with 0). 
+
+    :pdfin:
+        Name of the pdf file into which a new page is to be inserted. 
+    :page:
+        A pdf page  (an instance of PyPDF2.pdf.PageObject) which will be inserted. 
+    :index:
+        Position of the inserted page. 
+    :pdfout:
+        Name of the output pdf file. If None, the file pdfin 
+        will be replaced with the output file. 
+
+    Returns:
+        None. 
+    """
+    
+    if pdfout is None:
+        pdfout = pdfin
+        
+    pdf_in = open(pdfin, 'rb')
+    pdf_reader = pdf.PdfFileReader(pdf_in)
+    pdf_writer = pdf.PdfFileWriter()
+    pdf_writer.appendPagesFromReader(pdf_reader)
+    pdf_writer.insertPage(page, index=index)
+
+    temp_pdfout = pdfout if pdfout != pdfin else pdfout + "_temp"
+    pdf_out = open(temp_pdfout, "wb")
+    pdf_writer.write(pdf_out)
+    pdf_out.close()
+    pdf_in.close()
+    os.rename(temp_pdfout, pdfout)
+
+
+
 def extract_pages(inputpdf, fpage, lpage):
 
     '''

@@ -24,7 +24,7 @@ class ExamCode():
         tokens = self.base.split("-")
         if not len(tokens) >= 2:
             return False
-        if re.match("^(t_)?C\d{3}$", tokens[-2]) and re.match("^P\d{2}$", tokens[-1]):
+        if re.match(r"^(t_)?C\d{3}$", tokens[-2]) and re.match(r"^P\d{2}$", tokens[-1]):
             return True
         else:
             return False
@@ -85,6 +85,22 @@ class ExamCode():
         return "-".join(self.get_exam_code().split("-")[:-1])
 
 
+    def assembled_page_fname(self):
+        
+        '''
+        For a given QR code returns the name of the file 
+        with assembled copies of a page of the exam which will 
+        contain the page with this QR code. The name of the file 
+        is obtained by stripping the exam copy number from the QR
+        code. E.g. MTH309-C011-P03 becomes MTH309_page_3. 
+        '''
+
+        if self.get_exam_name() == "":
+            return f"page_{self.get_page_num()}"
+        else:
+            return f"{self.get_exam_name()}_page_{self.base.split('-')[-1]}"
+
+
 
 def covers_file(f):
 
@@ -94,3 +110,5 @@ def covers_file(f):
     '''
 
     return "page_0.pdf" in os.path.basename(f)
+
+

@@ -110,12 +110,12 @@ def get_missing_data(main_dir = None, gradebook = None):
     for page in missing_pages:
         if page["missing_data"] == "qr":
             qr = get_qr(page)
-            missing.set_qr(qr) 
+            missing_pages.set_qr(qr) 
         elif page["missing_data"] == "pnum":
             pnum = get_pnum(page)
-            missing.set_pnum(pnum)
+            missing_pages.set_pnum(pnum)
 
-    return len(missing.new_missing_data)
+    return len(missing_pages.new_missing_data)
 
 
 class MissingData(GradingBase):
@@ -137,8 +137,8 @@ class MissingData(GradingBase):
             raise Exception("File {self.missing_data_pages} not found.")
         
         # create temorary pages directory if needed
-        if not os.path.exists(self.pages_dir):
-            os.makedirs(self.pages_dir)
+        #if not os.path.exists(self.pages_dir):
+        #    os.makedirs(self.pages_dir)
 
         # read gradebook, add qr_code column if needed
         self.gradebook_df = pd.read_csv(self.gradebook, converters={self.pnum_column : str, self.qr_code_column : str})

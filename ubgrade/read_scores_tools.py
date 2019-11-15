@@ -88,9 +88,7 @@ class ReadScores(GradingBase):
             values.
         '''
 
-        # get files with exam problems, skip the file with exam covers
-        files = glob.glob(os.path.join(self.for_grading_dir, "*page_*.pdf"))
-        files = sorted([f for f in files if not covers_file(f)])
+ 
 
 
         grading_data = self.get_grading_data()
@@ -98,6 +96,10 @@ class ReadScores(GradingBase):
         maxpoints = grading_data["maxpoints"]
         # the directory with lists with exam codes for each problem
         page_lists = grading_data["page_lists"]
+
+        # get files with exam pages, skip the file with exam covers
+        files = [os.path.join(self.for_grading_dir, fname) for fname in page_lists]
+        files = sorted([f for f in files if not covers_file(f)])
 
         # dictionary for recording problem scores; records of the form
         # prob_n : list of scores for prob_n
