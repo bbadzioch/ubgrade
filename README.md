@@ -241,6 +241,9 @@ Note that this function will send emails only to students for whom graded exam f
 
 ## Version changes
 
+**0.1.7**
+- Bug fix.
+
 **0.1.6**
 - Added autorotation of scanned pdf files.
 - Bug fix: all files with the same exam page number were being saved in the same file for grading,
