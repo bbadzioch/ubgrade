@@ -75,14 +75,19 @@ def qr_handler():
             return redirect("/done")
         
         return redirect(f'/{page["missing_data"]}')
-
     
-    return render_template("qr_page.html", 
-                            title = f"QR code missing", 
-                            img_str= get_image(page["image"]), 
-                            source_page_num= page["page"], 
-                            source_file= page["fname"], 
-                            form=form)
+    if not missing_pages.finished:
+        if page["missing_data"] == "pnum":
+            return redirect(f'/{page["missing_data"]}')
+        else:
+            return render_template("qr_page.html", 
+                                    title = f"QR code missing", 
+                                    img_str= get_image(page["image"]), 
+                                    source_page_num= page["page"], 
+                                    source_file= page["fname"], 
+                                    form=form)
+    else:
+        return redirect("/done")
 
 
 
@@ -108,14 +113,20 @@ def pnum_handler():
         
         return redirect(f'/{page["missing_data"]}')
         
-    form.pnum.data  = page["pnum"]
-    return render_template("pnum_page.html", 
-                            title = f"Person number  missing", 
-                            img_str= get_image(page["image"]), 
-                            pnum = page["pnum"],
-                            source_page_num= page["page"], 
-                            source_file= page["fname"], 
-                            form=form)
+    if not missing_pages.finished:
+        if page["missing_data"] == "qr":
+            return redirect(f'/{page["missing_data"]}')
+        else:
+            form.pnum.data  = page["pnum"]
+            return render_template("pnum_page.html", 
+                                    title = f"Person number  missing", 
+                                    img_str= get_image(page["image"]), 
+                                    pnum = page["pnum"],
+                                    source_page_num= page["page"], 
+                                    source_file= page["fname"], 
+                                    form=form)
+    else:
+        return redirect("/done")
 
 
 
@@ -130,10 +141,11 @@ def finish_handler():
 if __name__ == "__main__":
     missing_pages = mdt.MissingData(main_dir = "../unit_tests", gradebook = None)
     page = next(missing_pages)
-    if page is not None:
+    if not missing_pages.finished:
         url = f'http://127.0.0.1:5000/{page["missing_data"]}'
     else:
         url = 'http://127.0.0.1:5000/done'
-    
-    webbrowser.open_new(url)
+
+    webbrowser.open(url)
     app.run(debug=True)
+
