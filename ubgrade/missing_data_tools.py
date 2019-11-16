@@ -91,8 +91,7 @@ def get_pnum(page):
 def get_missing_data(main_dir = None, gradebook = None):
 
     '''
-    Process pdf file with exam pages with missing QR codes or 
-    person numbers. 
+    Processes the pdf file with pages missing QR code or person number. 
     
     :main_dir:
         The main grading directory.  If  None the current working 
@@ -102,27 +101,26 @@ def get_missing_data(main_dir = None, gradebook = None):
             gragind directory. 
 
     Returns:
-        An interger indicating the number of skipped pages, which 
-        have data missing after this function is finished. 
+        An integer indicating the number of skipped pages, which 
+        will have data missing after this function is finished. 
     '''
 
-
+    # counter of skipped pages
     page_num = 0 
 
-
     while True:
-        # exceptions will raised if either the missing data page does not exists 
+        # exceptions will be raised if either the missing data page does not exists 
         # (i.e. all pages have complete data), or page_num exceeds the number of 
         # pages in the missing data pdf (which means that all missing data pages 
         # have been processed)
         try:
+            # get the first non-skipped page with missing data
             page = MissingData(main_dir = main_dir, gradebook = gradebook, page=page_num)
         except (NoMissingDataFile, NoSuchMissingPage):
             break
 
-        # get data of on a pdf file with missing data
         page_data = page.get_page_data()
-        # if page_data is None, there is actually no data missing
+        # if page_data is None, there is no data missing
         if page_data is None:
             continue
 
@@ -150,12 +148,12 @@ def get_missing_data(main_dir = None, gradebook = None):
     return page_num
 
 
-
 class NoMissingDataFile(Exception):
     '''
     Raised if there is no missing data file. 
     '''
     pass
+
 
 class NoSuchMissingPage(Exception):
     '''
@@ -168,14 +166,14 @@ class NoSuchMissingPage(Exception):
 class MissingData(GradingBase):
     
     '''
-    Class defining methods used to process pages with missing data. 
+    Class defining properties and methods used to process a page with missing data. 
     '''
 
     def __init__(self, main_dir = None, gradebook = None, page=0):
 
         '''
         :page:
-            The number of page of the pdf file with missing data pages 
+            The number of a page of the pdf file with missing data pages 
             to be processed (page numbers start with 0)
         
         All other arguments are inherited from the GradingBase constructor.
@@ -193,7 +191,7 @@ class MissingData(GradingBase):
         # read properties of the processed page
         self.missing_data = self.get_grading_data()["missing_data"]
         if self.page_num >= len(self.missing_data):
-            raise NoSuchMissingPage(f"Invalid page number {self.page_num}. There are {len(self.missing_data)} pages with missing data.")
+            raise NoSuchMissingPage(f"Invalid page number {self.page_num}. The number of pages in the file f{self.missing_data_pages} is {len(self.missing_data)}.")
 
         self.page_data = self.missing_data[self.page_num]
         self.qr = self.page_data["qr"]
@@ -205,7 +203,7 @@ class MissingData(GradingBase):
         self.missing_data_file = open(self.missing_data_pages, 'rb')
         self.missing_data_reader = pdf.PdfFileReader(self.missing_data_file)
         if self.page_num >= self.missing_data_reader.numPages:
-            raise NoSuchMissingPage(f"Invalid page number {self.page_num}. There are {len(self.missing_data)} in the file f{self.missing_data_pages}.")
+            raise NoSuchMissingPage(f"Invalid page number {self.page_num}. The number of pages in the file f{self.missing_data_pages} is {len(self.missing_data)}.")
         self.pdf_page = self.missing_data_reader.getPage(self.page_num)
         self.pdf_page_writer = pdf.PdfFileWriter()
         self.pdf_page_writer.addPage(self.pdf_page)
@@ -220,7 +218,8 @@ class MissingData(GradingBase):
     def valid_pnum(self, pnum):
         
         '''
-        Checks if the value of pnum corresponds to a person number listed ts in the gradebook
+        Checks if the value of pnum corresponds to 
+        a person number listed ts in the gradebook
         '''
 
         return (pnum is not None) and (pnum in self.gradebook_df[self.pnum_column].values)
@@ -229,8 +228,8 @@ class MissingData(GradingBase):
     def data_is_complete(self):
         
         '''
-        Returns True if the data for the current page (QR code and - for a cover page - person number)
-        is known, False otherwise. 
+        Checks if the all data for the current page 
+        (QR code and - for a cover page - person number) is known.
         '''
         
         if (self.qr is None):
@@ -259,8 +258,8 @@ class MissingData(GradingBase):
         '''
 
         # if pnum = "add", the value of self.pnum is added to the gradebook
+        # together with a timestamp indicating when it was added
         if pnum == "add":
-            # add a timestamp to the gradebook indicating when the person number was added
             if self.pnum_time_column not in self.gradebook_df.columns:
                 self.gradebook_df[self.pnum_time_column] = ""
             now = datetime.datetime.now()
@@ -268,7 +267,6 @@ class MissingData(GradingBase):
             new_row = {self.pnum_column:[self.pnum], self.pnum_time_column: [dt_string]}
             new_row_df = pd.DataFrame(new_row)
             self.gradebook_df = self.gradebook_df.append(new_row_df, sort=False).reset_index().drop(columns = ["index"])
-        
         else:
             self.pnum = pnum
 
@@ -276,10 +274,11 @@ class MissingData(GradingBase):
     def record_page(self):
         
         '''
-        Assuming that all page data is known, this function saves the current page the files 
-        assembled for grading. For an exam cover page, it also records the QR code in the notebook. 
+        If all page data is known, this function remmoves the page from the missing data file, 
+        and adds it to the files assembled for grading. For an exam cover page, it also records 
+        the QR code in the gradebook. 
         
-        If the some page data is missing, the values of self.pnum and self.qr are recorded in the 
+        If some page data is missing, the values of self.pnum and self.qr are recorded in the 
         grading data. 
         '''
 
@@ -297,7 +296,6 @@ class MissingData(GradingBase):
 
             # move the page from missing pages to assembled pages, and record it in the grading data
             assembled_fname = ExamCode(self.qr).assembled_page_fname() + ".pdf"
-            print(assembled_fname)
             page_fname = f"t_{self.qr}.pdf"
 
             if assembled_fname in page_lists:  
@@ -330,12 +328,10 @@ class MissingData(GradingBase):
     def get_page_data(self):
 
         '''
-        If the page data is complete, records the page, moves the page from missing date 
-        to an assembled for grading file and returns None. 
-        Otherwise returns a dictionary with page data. 
+        If the page data is complete, this function records the page, moving 
+        the page from missing date file to an assembled for grading file and 
+        returns None.  Otherwise it returns a dictionary with page data. 
         '''
-
-
 
         if self.data_is_complete():
                 self.record_page()
