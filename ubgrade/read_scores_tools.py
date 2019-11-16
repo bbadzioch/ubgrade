@@ -112,7 +112,7 @@ class ReadScores(GradingBase):
 
             basename = os.path.basename(fname)
             # page/problem number
-            page_num = (os.path.splitext(basename)[0]).split("_")[-1]
+            page_num = ExamCode(basename).get_page_num()
             # maximal possible score for the problem
             problem_max = maxpoints[page_num]
 

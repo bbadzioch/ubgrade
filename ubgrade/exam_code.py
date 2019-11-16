@@ -54,8 +54,12 @@ class ExamCode():
 
     def get_page_num(self):
 
+        return self.base.split("-")[-1]
+
+    def get_page_num_int(self):
+
         '''
-        Returns the part of the exam page QR code giving the exam page number.
+        Returns an integer with the exam page number (page numbers staert at 0).
         '''
 
         return int(self.base.split("-")[-1][1:])
@@ -66,7 +70,7 @@ class ExamCode():
         Checks if a page is a cover page of an exam.
         '''
 
-        return self.get_page_num() == 0
+        return self.get_page_num_int() == 0
 
     def table_fname(self):
 
@@ -96,9 +100,9 @@ class ExamCode():
         '''
 
         if self.get_exam_name() == "":
-            return f"page_{self.get_page_num()}"
+            return f"{self.base.split('-')[-1]}"
         else:
-            return f"{self.get_exam_name()}_page_{self.base.split('-')[-1]}"
+            return f"{self.get_exam_name()}-{self.base.split('-')[-1]}"
 
 
 
@@ -109,6 +113,6 @@ def covers_file(f):
     if it consists of cover pages
     '''
 
-    return "page_0.pdf" in os.path.basename(f)
+    return "P00.pdf" in os.path.basename(f)
 
 

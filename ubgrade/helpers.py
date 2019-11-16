@@ -66,6 +66,56 @@ def insert_pdf_page(pdfin, page, index=0, pdfout=None):
     pdf_in.close()
     os.rename(temp_pdfout, pdfout)
 
+import PyPDF2 as pdf
+import os
+import shutil
+
+
+def delete_pdf_page(pdfin, index=0, pdfout=None):
+    """
+    Deletes a page with a given page number from a pdf file. 
+    Page indexing starts at 0. Deleting a page with number that 
+    not exists in the file does not delete any pages. Deleting 
+    page 0 from a single-page pdf does not produce any file 
+    (or deletes the file if pdfin=pdfout)
+    
+    :pdfin:
+        Name of the pdf file into which a new page is to be inserted. 
+    :index:
+        Page number of the page to be deleted.  
+    :pdfout:
+        Name of the output pdf file. If None, the file pdfin 
+        will be replaced with the output file. 
+
+    Returns:
+        None. 
+    """
+
+    if pdfout is None:
+        pdfout = pdfin
+
+    pdf_in = open(pdfin, 'rb')
+    pdf_reader = pdf.PdfFileReader(pdf_in)
+    pdf_writer = pdf.PdfFileWriter()
+    
+    # deleting the first page of a 1-page file deletes the file
+    if pdf_reader.getNumPages() == 1 and index == 0:
+        pdf_in.close()
+        if pdfout == pdfin:
+            os.remove(pdfin)
+        return None
+            
+    for i in range(pdf_reader.getNumPages()):
+        if i != index:
+            page = pdf_reader.getPage(i)
+            pdf_writer.addPage(page)
+
+    temp_pdfout = pdfout if pdfout != pdfin else pdfout + "_temp"
+    pdf_out = open(temp_pdfout, "wb")
+    pdf_writer.write(pdf_out)
+    pdf_out.close()
+    pdf_in.close()
+    os.rename(temp_pdfout, pdfout)
 
 
 def extract_pages(inputpdf, fpage, lpage):

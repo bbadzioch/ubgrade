@@ -174,7 +174,8 @@ class PrepareGrading(GradingBase):
 
             # get the maximum score for an exam page
             page_num = fcode.get_page_num()
-            max_score = self.maxpoints[min(page_num-1, len(self.maxpoints)-1)]
+            page_num_int = fcode.get_page_num_int()
+            max_score = self.maxpoints[min(page_num_int-1, len(self.maxpoints)-1)]
             max_score_dict[page_num] = max_score
 
             # pages worth 0 points do not get score tables added
@@ -485,7 +486,8 @@ class PrepareGrading(GradingBase):
             files_dir[f] = fcode.assembled_page_fname()
 
         # create the set of page (or problem) numbers of the exam
-        problems = set(files_dir.values())
+        problems = list(set(files_dir.values()))
+        problems.sort()
 
         # this dictionary will record which pages are in each assembled pdf file
         page_lists = {}
