@@ -145,7 +145,7 @@ def enhanced_qr_decode(img, xmax=5, ymax=5):
     '''
 
     # read a QR code
-    qr = pyz.decode(img)
+    qr = pyz.decode(img, symbols=[pyz.ZBarSymbol.QRCODE]) # look for QR codes only
 
     # if QR code is not found, modify the image and try again
     if len(qr) == 0:
@@ -154,12 +154,12 @@ def enhanced_qr_decode(img, xmax=5, ymax=5):
         for i, j in [(i, j) for i in range(1, xmax+1) for j in range(1, ymax+1)]:
             opened = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, np.ones((i, j)))
             opened = cv2.bitwise_not(opened)
-            qr = pyz.decode(opened)
+            qr = pyz.decode(opened, symbols=[pyz.ZBarSymbol.QRCODE]) # look for QR codes only
             if len(qr) != 0:
                 break
             closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, np.ones((i, j)))
             closed = cv2.bitwise_not(closed)
-            qr = pyz.decode(closed)
+            qr = pyz.decode(closed, symbols=[pyz.ZBarSymbol.QRCODE]) # look for QR codes only
             if len(qr) != 0:
                 break
     return qr
