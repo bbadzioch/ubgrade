@@ -313,7 +313,7 @@ class PrepareGrading(GradingBase):
 
 
    
-    def read_scans(self, scans):
+    def read_scans(self, scans, skip_codes = []):
 
         '''
         Given a pdf file with scanned exams:
@@ -326,10 +326,10 @@ class PrepareGrading(GradingBase):
 
         :scans:
             The name of the pdf file to be processed.
-        :get_missing_data:
-            Boolean. If False, pages where a QR code or the person number cannot be read will quietly saved
-            into a separate file, to be processed later. If True, every such page will prompt the user for
-            manual input.
+        :skip_codes:
+            A list of of strings. If the content of a QR code detected on an exam page matches one of the 
+            strings on this list, the page will be skipped over and will not be processed at all. This can 
+            be useful if e.g. scanned exam files include pages with scratchwork which should be ignored.  
 
         Returns:
             None
@@ -381,13 +381,22 @@ class PrepareGrading(GradingBase):
                 # get QR code from the page
                 try:
                     qr_list = enhanced_qr_decode(page_image)
-                    qr_found = (len(qr_list) != 0)
+                    qr_found = (len(qr_list) == 1)
                 except:
                     qr_found = False
                   
                 if qr_found:
                     qr = qr_list[0].data.decode('utf8')
-                    qr_code = ExamCode(qr)
+                    # skip pages with QR codes listed on the skip_codes list
+                    if qr in skip_codes:
+                        continue
+                    else:
+                        # verify the the QR code is a valid exam code; if not treat the page 
+                        # as a page with a missing QR code 
+                        qr_code = ExamCode(qr)
+                        if not qr_code.valid():
+                            qr_found = False
+                            qr = None
                 else:
                     qr = None
 
@@ -512,7 +521,7 @@ class PrepareGrading(GradingBase):
 
 
 
-    def prepare_grading(self, files=None,  rotate=None, batch=False):
+    def prepare_grading(self, files=None,  rotate=None, skip_codes = [], batch=False):
 
         '''
         Prepares exams for grading:
@@ -540,6 +549,10 @@ class PrepareGrading(GradingBase):
             that on a correctly oriented page the QR code is located in the upper right corner. 
             The automatic angle detection will check the angle of rotation for each pdf file separately, 
             but all pages in a given file will be rotated by the same angle.  
+        :skip_codes:
+            A list of of strings. If the content of a QR code detected on an exam page matches one of the 
+            strings on this list, the page will be skipped over and will not be processed at all. This can 
+            be useful if e.g. scanned exam files include pages with scratchwork which should be ignored.  
         :batch:
             Boolean. It True, pages with missing QR codes or person number will be recorded and 
             saved into a separate file, but there will be no attempt to ask the user to provide 
@@ -596,13 +609,13 @@ class PrepareGrading(GradingBase):
             else:
                 rotate_pdf(angle = rotate, pdfin = fpath)
 
-            self.read_scans(scans = fpath)
+            self.read_scans(scans = fpath, skip_codes = skip_codes)
             processed.append(f)
 
         # get information about pages with missing QR/person number data
         if  (not batch) and  os.path.isfile(self.missing_data_pages):
             print(f"Reading file:  {os.path.basename(self.missing_data_pages)}\n")
-            get_missing_data()
+            get_missing_data(gradebook=self.gradebook)
 
 
         print("Adding score tables..." + 40*" ")

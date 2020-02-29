@@ -105,7 +105,7 @@ def get_missing_data(main_dir = None, gradebook = None):
         missing after this function is finished. 
     '''
 
-    missing_pages = MissingData(main_dir = None, gradebook = None)
+    missing_pages = MissingData(main_dir = None, gradebook = gradebook)
 
     for page in missing_pages:
         if page["missing_data"] == "qr":

@@ -9,6 +9,11 @@ Installation:
 pip install ubgrade
 ```
 
+**Note:**  `ubgrade` uses the `pyzbar` library to read QR codes on exam pages. While `pyzbar`
+is automatically installed by running the above command, on Max OS X and Linux it requires
+a separate installation of the `zbar` shared library. See the
+[`pyzbar` installation instructions](https://pypi.org/project/pyzbar/) for details.
+
 Import:
 
 ```
@@ -79,7 +84,7 @@ to this file as *the gradebook file*.
 The signature of this function is as follows:
 
 ```
-ubgrade.prep_grading(maxpoints, main_dir = None, gradebook = None, rotate = None, batch = False, files = None, init_grading_data = False)
+ubgrade.prep_grading(maxpoints, main_dir = None, gradebook = None, rotate = None, skip_codes = [], batch = False, files = None, init_grading_data = False)
 ```
 
 * `maxpoints`: A list with the maximal possible score of each exam page.
@@ -101,6 +106,11 @@ automatically detected, using the assumption that on a correctly oriented page
 the QR code is located in the upper right corner. The  automatic angle detection
 will check the angle of rotation for each pdf file separately, but all pages in
 a given file will be rotated by the same angle.  
+
+* `skip_codes`:
+A list of of strings. If the content of a QR code detected on an exam page matches one of the
+strings on this list, the page will be skipped over and will not be processed at all. This can
+be useful if e.g. scanned exam files include pages with scratchwork which should be ignored.  
 
 * `batch`: Boolean. By default, if the function encounters pages where QR code
 or person number which be read, it will ask the user to enter this
@@ -240,6 +250,15 @@ Note that this function will send emails only to students for whom graded exam f
 
 
 ## Version changes
+
+**0.1.8**
+- Added `skip_codes` argument to the `prepare_grading` function.
+- If the number of QR codes detected on a page is not equal to 1, or if the content of the detected QR code
+  is not a valid exam code, the page is now treated as a page with missing QR code.
+- Bug fix: in the previous version the program was searching exam pages for all types of codes handled
+  by the `pyzbar` library; this search is now limited to QR codes only.  
+- Bug fix: the name of the gradebook file was not being passed to the function handling missing data,
+  resulting in an error, fixed now.
 
 **0.1.7**
 - Bug fix.

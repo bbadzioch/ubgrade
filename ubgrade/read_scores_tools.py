@@ -106,7 +106,7 @@ class ReadScores(GradingBase):
         # iterate over exam problem files
         for fname in files:
             basename = os.path.basename(fname)
-            print(f"Processing: {basename}\r", end="")
+            print(f"Processing: {basename}" + 10*" " + "\r", end="")
 
             basename = os.path.basename(fname)
             # page/problem number
