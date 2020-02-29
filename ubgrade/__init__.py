@@ -1,4 +1,4 @@
-__version__ = "0.1.7"
+__version__ = "0.1.8"
 
 
 from ubgrade.make_exams_tools import make_exams

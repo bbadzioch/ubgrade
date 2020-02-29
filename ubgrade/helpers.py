@@ -266,7 +266,8 @@ def detect_and_rotate(pdfin, pdfout = None):
         if rotation is not None:
             break
 
-    if rotation is None:
-        shutil.copyfile(pdfin, pdfout) 
+    if rotation is None: 
+        if (pdfout is not None) and (pdfin != pdfout):
+            shutil.copyfile(pdfin, pdfout) 
     else:
         rotate_pdf(rotation, pdfin, pdfout)

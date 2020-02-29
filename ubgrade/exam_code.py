@@ -24,7 +24,7 @@ class ExamCode():
         tokens = self.base.split("-")
         if not len(tokens) >= 2:
             return False
-        if re.match("^(t_)?C\d{3}$", tokens[-2]) and re.match("^P\d{2}$", tokens[-1]):
+        if re.match(r"^(t_)?C\d{3}$", tokens[-2]) and re.match(r"^P\d{2}$", tokens[-1]):
             return True
         else:
             return False
