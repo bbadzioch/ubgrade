@@ -312,7 +312,7 @@ class AssembleGradedExams(GradingBase):
         self.split_for_grading_files(dest_dir = temp_dir)
 
         covers = sorted([f for f in glob.glob(os.path.join(temp_dir, "*.pdf")) if ExamCode(f).is_cover()])
-        prob_cols = sorted([c for c in gradebook_df.columns.tolist() if "page_" in c])
+        prob_cols = sorted([c for c in gradebook_df.columns.tolist() if "page_" in c], key = lambda s: int(s.split("_")[-1]))
 
         if prob_labels is None:
             prob_labels = dict([ (p, f"P{p.split('_')[-1]}") for p in prob_cols] )
