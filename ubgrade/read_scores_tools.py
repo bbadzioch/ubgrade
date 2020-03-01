@@ -125,8 +125,8 @@ class ReadScores(GradingBase):
                 score_dict_page = {p:s for (p,s) in zip(pages, score_list)}
                 score_dict["page_" + page_num] = score_dict_page
 
-        # conver the scores dictionary into dataframe with rows indexed by exam QR codes and
-        # colmns labeled prob_n where n is the problem numnber
+        # convert the scores dictionary into dataframe with rows indexed by exam QR codes and
+        # columns labeled prob_n where n is the problem numnber
         scores_df = pd.DataFrame(score_dict)
 
         return scores_df
