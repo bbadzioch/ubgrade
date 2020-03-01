@@ -100,7 +100,7 @@ class ReadScores(GradingBase):
         page_lists = grading_data["page_lists"]
 
         # dictionary for recording problem scores; records of the form
-        # prob_n : list of scores for prob_n
+        # prob_n : dictionary of scores for prob_n with keys given by exam codes
         score_dict = {}
 
         # iterate over exam problem files
