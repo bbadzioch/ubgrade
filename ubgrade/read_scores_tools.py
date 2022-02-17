@@ -128,7 +128,9 @@ class ReadScores(GradingBase):
         # convert the scores dictionary into dataframe with rows indexed by exam QR codes and
         # columns labeled prob_n where n is the problem numnber
         scores_df = pd.DataFrame(score_dict)
-
+        # NEXT TWO LINES TO BE TESTED: ordering problem columns according to problems numbers
+        #ordered_cols = sorted(list(score_dict.keys()), key = lambda s: int(s.split("_")[-1])
+        #scores_df = scores_df[ordered_cols]
         return scores_df
 
 
