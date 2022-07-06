@@ -7,6 +7,7 @@ import shutil
 from reportlab.lib.units import inch
 
 
+
 class GradingBase():
 
     '''
@@ -22,12 +23,12 @@ class GradingBase():
             named 'scans' with with pdf files of scanned exams. If main_dir
             is None the current working directory will be used.
         :gradebook:
-            A csv file used in grading. This file must be located in the main 
+            A csv file used in grading. This file must be located in the main
             grading directory. Prior to the start of grading it should
             contain at least one column with heading 'person_number' containing
-            person numbers of students taking the exam. The header row should be 
-            the first row of the file. If gradebook is None, it will be assumed that 
-            the gradebook file is called gradebook.csv. 
+            person numbers of students taking the exam. The header row should be
+            the first row of the file. If gradebook is None, it will be assumed that
+            the gradebook file is called gradebook.csv.
         :init_grading_data:
             Bollean. If True, auxiliary files used in grading will be reset to the
             initial status, and the grading process will start from scratch.
@@ -59,11 +60,11 @@ class GradingBase():
         self.grading_data_jfile = os.path.join(self.main_dir, "grading_data.json")
 
 
-        # data structure for recording information about pages with 
-        # missing/misread QR codes and person numbers 
-        self.page_missing_data = {"fname": None, 
-                                  "page": None, 
-                                  "qr": None, 
+        # data structure for recording information about pages with
+        # missing/misread QR codes and person numbers
+        self.page_missing_data = {"fname": None,
+                                  "page": None,
+                                  "qr": None,
                                   "pnum": None
                                   }
 
@@ -137,7 +138,7 @@ class GradingBase():
 
 
     def split_for_grading_files(self, dest_dir):
-        
+
         '''
         When exams are assembled by problem, this function can be used to split them
         into individial pages, with file names reflecting the QR code on each page.
