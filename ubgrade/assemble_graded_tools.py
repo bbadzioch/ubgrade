@@ -273,12 +273,13 @@ class AssembleGradedExams(GradingBase):
             writer.write(foo)
 
 
-    def assemble_by_student(self, prob_labels = None, extras = None,  flatten = False):
+    def assemble_by_student(self, score_table = True, prob_labels = None, extras = None,  flatten = False):
 
         '''
         Assembles graded exam files by student, adding score tables to the exam
         covers and score marks to other pages.
-
+        :score_table:
+            Boolean. If True (default) score table will be added to cover pages.
         :prob_labels:
             If prob_labels is None (default) score boxes for each exam problem  will be 
             labeled according to page numbers, e.g. the label of the score for the problem 
@@ -324,32 +325,33 @@ class AssembleGradedExams(GradingBase):
             return s
 
         # add score tables to exam covers
-        print(f"Adding score tables..." + 40*" ")
-        for cover in covers:
-            ex_code = ExamCode(cover)
-            print(f"{ex_code.get_exam_code()}\r", end="")
-            cover_copy = os.path.join(temp_dir, "copy_" + ex_code.base + ".pdf")
-            shutil.copyfile(cover, cover_copy)
-            qr = ex_code.get_exam_code()
-            record = gradebook_df.loc[gradebook_df[self.qr_code_column] == qr]
-            scores = record[prob_cols]
-            score_table_data = {}
-            for k in prob_cols:
-                score_table_data[prob_labels[k]] = format_scores(scores[k])
+        if score_table:
+            print(f"Adding score tables..." + 40*" ")
+            for cover in covers:
+                ex_code = ExamCode(cover)
+                print(f"{ex_code.get_exam_code()}\r", end="")
+                cover_copy = os.path.join(temp_dir, "copy_" + ex_code.base + ".pdf")
+                shutil.copyfile(cover, cover_copy)
+                qr = ex_code.get_exam_code()
+                record = gradebook_df.loc[gradebook_df[self.qr_code_column] == qr]
+                scores = record[prob_cols]
+                score_table_data = {}
+                for k in prob_cols:
+                    score_table_data[prob_labels[k]] = format_scores(scores[k])
 
-            for k in extras:
-                score_table_data[extras[k]] =  format_scores(record[k])
+                for k in extras:
+                    score_table_data[extras[k]] =  format_scores(record[k])
 
-            if self.total_column in record.columns:
-                score_table_data["total"] =  format_scores(record[self.total_column].values[0])
-            if self.grade_column in record.columns:
-                score_table_data["grade"] = record[self.grade_column].values[0]
+                if self.total_column in record.columns:
+                    score_table_data["total"] =  format_scores(record[self.total_column].values[0])
+                if self.grade_column in record.columns:
+                    score_table_data["grade"] = record[self.grade_column].values[0]
 
-            # save the cover file with the added score table
-            self.cover_page_grades(fname=cover_copy, table_data = score_table_data, output_file=cover, flatten=flatten)
-            os.remove(cover_copy)
+                # save the cover file with the added score table
+                self.cover_page_grades(fname=cover_copy, table_data = score_table_data, output_file=cover, flatten=flatten)
+                os.remove(cover_copy)
 
-        print(f"Score tables added." + 40*" ")
+            print(f"Score tables added." + 40*" ")
 
         pages = sorted([f for f in glob.glob(os.path.join(temp_dir, "*.pdf")) if not ExamCode(f).is_cover()])
         maxpoints = self.get_grading_data()["maxpoints"]
